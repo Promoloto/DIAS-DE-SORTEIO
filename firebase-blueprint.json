@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "GameLogos": {
+      "title": "GameLogos",
+      "description": "Logotipos personalizados em formato base64 ou URL para cada modalidade de loteria",
+      "type": "object",
+      "properties": {
+        "logos": {
+          "type": "object",
+          "description": "Dicionário de nomes de jogos mapeados para seus logotipos PNG em base64"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp ISO da última atualização dos logos"
+        }
+      },
+      "required": ["logos"]
+    },
+    "AppConfig": {
+      "title": "AppConfig",
+      "description": "Configurações gerais da lotérica (código de 4 dígitos, nome e links)",
+      "type": "object",
+      "properties": {
+        "lotteryCode": {
+          "type": "string",
+          "description": "Código de 4 dígitos da lotérica"
+        },
+        "lotteryName": {
+          "type": "string",
+          "description": "Nome da unidade lotérica"
+        },
+        "customLinks": {
+          "type": "object",
+          "description": "Links customizados de bolões para cada jogo"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp ISO da última alteração"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/settings/game_logos": {
+      "schema": "GameLogos",
+      "description": "Armazenamento compartilhado dos logotipos PNG personalizados das loterias"
+    },
+    "/settings/app_config": {
+      "schema": "AppConfig",
+      "description": "Configurações compartilhadas da lotérica"
+    }
+  }
+}

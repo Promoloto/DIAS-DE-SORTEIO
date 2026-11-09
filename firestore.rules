@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Health-check / test connection
+    match /test/{testId} {
+      allow read: if true;
+    }
+
+    // Configurações globais compartilhadas (logotipos e dados da lotérica)
+    match /settings/{settingId} {
+      // Leitura pública para que clientes e abas anônimas vejam os mesmos logos
+      allow get: if settingId in ['game_logos', 'app_config'];
+      allow list: if false;
+      // Atualização permitida para gravação de novos logotipos ou configurações da lotérica
+      allow create, update: if settingId in ['game_logos', 'app_config'];
+      allow delete: if false;
+    }
+  }
+}

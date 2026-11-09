@@ -318,6 +318,18 @@
 
                 <!-- COLUNA ESQUERDA: FORMULÁRIO DE CONFIGURAÇÃO -->
                 <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+                    <!-- Status da Nuvem Firebase -->
+                    <div class="mb-5 p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between flex-wrap gap-2">
+                        <div id="cloud-sync-status" class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold shadow-sm">
+                            <i class="fa-solid fa-cloud-check text-emerald-600"></i>
+                            <span>Nuvem Ativa: Logotipos salvos globalmente para qualquer visitante</span>
+                        </div>
+                        <button type="button" onclick="manualForceSyncCloud()" class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition cursor-pointer shadow-xs">
+                            <i class="fa-solid fa-cloud-arrow-up text-blue-600"></i>
+                            <span>Sincronizar Nuvem</span>
+                        </button>
+                    </div>
+
                     <form id="admin-form" onsubmit="event.preventDefault(); applyAdminChanges();" class="space-y-6">
                         
                         <!-- Campo 1: URL Fixa com Entrada Exclusiva de 4 Dígitos -->
@@ -659,6 +671,120 @@
         </button>
     </footer>
 
+    <!-- INTEGRAÇÃO COM FIREBASE FIRESTORE (SINCRONIZAÇÃO GLOBAL E MODO ANÔNIMO) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDocFromServer } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            projectId: "gen-lang-client-0075801846",
+            appId: "1:46124015574:web:0f36b6029d8c35575cce77",
+            apiKey: "AIzaSyCiJpqpkFOHI2484vfVA7yKstYBzSoWH8I",
+            authDomain: "gen-lang-client-0075801846.firebaseapp.com",
+            firestoreDatabaseId: "ai-studio-gerenciadordebol-7725fa56-1c12-482e-86f9-84093740670c",
+            storageBucket: "gen-lang-client-0075801846.firebasestorage.app",
+            messagingSenderId: "46124015574"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+
+        // Teste de conexão inicial com o Firestore
+        async function testConnection() {
+            try {
+                await getDocFromServer(doc(db, 'settings', 'game_logos'));
+                console.log("[Firebase] Conexão com Firestore confirmada com sucesso!");
+                if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
+            } catch (error) {
+                if (error instanceof Error && error.message.includes('the client is offline')) {
+                    console.warn("[Firebase] Cliente offline, usando cache local.");
+                    if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(false, "Offline / Cache local ativo");
+                }
+            }
+        }
+        testConnection();
+
+        // Salvar logos na nuvem Firestore
+        window.saveLogosToCloud = async function(logos) {
+            try {
+                await setDoc(doc(db, "settings", "game_logos"), {
+                    logos: logos,
+                    updatedAt: new Date().toISOString()
+                });
+                console.log("[Firebase] Logos salvos com sucesso no Firestore!");
+                if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
+                return true;
+            } catch (err) {
+                console.error("[Firebase] Erro ao salvar logos no Firestore:", err);
+                if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(false, "Erro ao salvar na nuvem");
+                return false;
+            }
+        };
+
+        // Salvar configurações gerais na nuvem Firestore
+        window.saveConfigToCloud = async function(config) {
+            try {
+                await setDoc(doc(db, "settings", "app_config"), {
+                    ...config,
+                    updatedAt: new Date().toISOString()
+                });
+                console.log("[Firebase] Configurações salvas no Firestore!");
+                return true;
+            } catch (err) {
+                console.error("[Firebase] Erro ao salvar config no Firestore:", err);
+                return false;
+            }
+        };
+
+        // Ouvinte em tempo real: sincroniza logos em qualquer dispositivo ou aba anônima
+        onSnapshot(doc(db, "settings", "game_logos"), (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                if (data && data.logos && typeof data.logos === 'object') {
+                    console.log("[Firebase] Logos recebidos da nuvem:", Object.keys(data.logos).length);
+                    if (window.onCloudLogosReceived) {
+                        window.onCloudLogosReceived(data.logos);
+                    }
+                    if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
+                }
+            } else {
+                // Se a nuvem estiver vazia, mas o navegador atual tiver logos locais, sobe para o Firestore
+                if (window.CUSTOM_GAME_LOGOS && Object.keys(window.CUSTOM_GAME_LOGOS).length > 0) {
+                    console.log("[Firebase] Nuvem vazia, enviando logos locais salvos...");
+                    window.saveLogosToCloud(window.CUSTOM_GAME_LOGOS);
+                }
+            }
+        }, (error) => {
+            console.warn("[Firebase] Aviso na sincronização de logos:", error);
+            if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(false, "Offline / Usando cache local");
+        });
+
+        // Ouvinte em tempo real para configurações da lotérica
+        onSnapshot(doc(db, "settings", "app_config"), (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                if (data && window.onCloudConfigReceived) {
+                    window.onCloudConfigReceived(data);
+                }
+            }
+        }, (error) => {
+            console.warn("[Firebase] Aviso na sincronização de config:", error);
+        });
+
+        // Badge visual de status da nuvem
+        window.updateCloudSyncBadge = function(isSuccess, customText) {
+            const el = document.getElementById('cloud-sync-status');
+            if (!el) return;
+            if (isSuccess) {
+                el.className = "inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold shadow-sm";
+                el.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-600"></i><span>${customText || 'Nuvem Ativa: Logotipos salvos globalmente para qualquer visitante'}</span>`;
+            } else {
+                el.className = "inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-800 border border-amber-300 rounded-full text-xs font-bold shadow-sm";
+                el.innerHTML = `<i class="fa-solid fa-cloud-arrow-up text-amber-600"></i><span>${customText || 'Conectando à nuvem...'}</span>`;
+            }
+        };
+    </script>
+
     <!-- JAVASCRIPT DA APLICAÇÃO (EMBUTIDO E 100% AUTO-CONTIDO) -->
     <script>
         // --- 1. DADOS OFICIAIS DOS DIAS DE SORTEIO DA CAIXA (11 JOGOS) ---
@@ -886,7 +1012,7 @@
         let customLogoData = localStorage.getItem('caixa_custom_logo') || "";
         let generatedSvgString = "";
 
-        // Logotipos personalizados de cada jogo (armazenados em base64 PNG no localStorage)
+        // Logotipos personalizados de cada jogo (armazenados em base64 PNG no localStorage e sincronizados no Firebase Firestore)
         let CUSTOM_GAME_LOGOS = {};
         try {
             const savedLogos = localStorage.getItem('caixa_game_logos');
@@ -897,7 +1023,109 @@
             console.warn("Não foi possível carregar logos salvos:", e);
             CUSTOM_GAME_LOGOS = {};
         }
+        window.CUSTOM_GAME_LOGOS = CUSTOM_GAME_LOGOS;
         let currentGameForLogoUpload = null;
+
+        // Callback invocado quando logos chegam da nuvem (Firestore) - Garante exibição em modo anônimo e para todos
+        window.onCloudLogosReceived = function(cloudLogos) {
+            if (!cloudLogos || typeof cloudLogos !== 'object') return;
+            console.log("[App] Aplicando logos recebidos da nuvem:", Object.keys(cloudLogos).length);
+            CUSTOM_GAME_LOGOS = Object.assign({}, CUSTOM_GAME_LOGOS, cloudLogos);
+            window.CUSTOM_GAME_LOGOS = CUSTOM_GAME_LOGOS;
+            try {
+                localStorage.setItem('caixa_game_logos', JSON.stringify(CUSTOM_GAME_LOGOS));
+            } catch (e) {
+                console.warn("[App] Erro ao gravar cache local:", e);
+            }
+            renderTableGrid();
+            renderGamesFilterButtons();
+            renderScheduleManager();
+            const detailPanel = document.getElementById('game-detail-panel');
+            if (detailPanel && !detailPanel.classList.contains('hidden')) {
+                const titleEl = document.getElementById('game-detail-title');
+                if (titleEl) {
+                    const currentTitle = titleEl.innerText.trim();
+                    const matchedGame = ALL_GAMES.find(g => currentTitle.includes(g));
+                    if (matchedGame) selectGameDetail(matchedGame);
+                }
+            }
+        };
+
+        // Callback invocado quando configurações da lotérica chegam da nuvem
+        window.onCloudConfigReceived = function(cfg) {
+            if (!cfg) return;
+            console.log("[App] Configurações recebidas da nuvem:", cfg);
+            let changesMade = false;
+            if (cfg.lotteryCode && cfg.lotteryCode !== currentCode) {
+                currentCode = cfg.lotteryCode;
+                currentLink = `https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/${currentCode}`;
+                localStorage.setItem('caixa_bolao_code', currentCode);
+                localStorage.setItem('caixa_bolao_link', currentLink);
+                const codeInput = document.getElementById('input-lottery-code');
+                if (codeInput && document.activeElement !== codeInput) codeInput.value = currentCode;
+                const previewCodeEl = document.getElementById('preview-lottery-code');
+                if (previewCodeEl) previewCodeEl.innerText = currentCode;
+                const detectedBadgeEl = document.getElementById('detected-code-badge');
+                if (detectedBadgeEl) detectedBadgeEl.innerText = currentCode;
+                changesMade = true;
+            }
+            if (cfg.lotteryName && cfg.lotteryName !== currentName) {
+                currentName = cfg.lotteryName;
+                localStorage.setItem('caixa_bolao_name', currentName);
+                const nameInput = document.getElementById('input-lottery-name');
+                if (nameInput && document.activeElement !== nameInput) nameInput.value = currentName;
+                const headerNameEl = document.getElementById('header-lottery-name');
+                if (headerNameEl) headerNameEl.innerText = currentName;
+                const previewNameEl = document.getElementById('preview-lottery-name');
+                if (previewNameEl) previewNameEl.innerText = currentName;
+                changesMade = true;
+            }
+            if (cfg.customLogoData !== undefined && cfg.customLogoData !== customLogoData) {
+                customLogoData = cfg.customLogoData;
+                if (customLogoData) {
+                    localStorage.setItem('caixa_custom_logo', customLogoData);
+                } else {
+                    localStorage.removeItem('caixa_custom_logo');
+                }
+                updateAllLogos();
+            }
+            if (cfg.scheduleData && typeof cfg.scheduleData === 'object') {
+                SCHEDULE_DATA = cfg.scheduleData;
+                localStorage.setItem('caixa_schedule_data', JSON.stringify(SCHEDULE_DATA));
+                rebuildGameDaysMap();
+                renderTableGrid();
+                renderGamesFilterButtons();
+                renderScheduleManager();
+            }
+            if (changesMade) {
+                generateQrSvg();
+                renderTableGrid();
+            }
+        };
+
+        // Função para forçar sincronização manual imediata com o Firestore
+        window.manualForceSyncCloud = async function() {
+            showToast("Sincronizando com a nuvem...", "bg-blue-600 text-white");
+            let success = true;
+            if (window.saveLogosToCloud) {
+                const res = await window.saveLogosToCloud(CUSTOM_GAME_LOGOS);
+                if (!res) success = false;
+            }
+            if (window.saveConfigToCloud) {
+                const res2 = await window.saveConfigToCloud({
+                    lotteryCode: currentCode,
+                    lotteryName: currentName,
+                    customLogoData: customLogoData,
+                    scheduleData: SCHEDULE_DATA
+                });
+                if (!res2) success = false;
+            }
+            if (success) {
+                showToast("Sincronizado na nuvem! Disponível em qualquer dispositivo ou modo anônimo.", "bg-emerald-600 text-white");
+            } else {
+                showToast("Aviso: Falha ao enviar para a nuvem. Tentando reconectar...", "bg-amber-600 text-white");
+            }
+        };
 
         // Logotipo Oficial da Caixa atualizado com a geometria exata do novo logotipo
         const DEFAULT_CAIXA_CLOVER_SVG = `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-label="Trevo Caixa Oficial">
@@ -1010,7 +1238,15 @@
                     console.warn("Storage quota exceeded", err);
                 }
                 updateAllLogos();
-                showToast("Logotipo atualizado em todos os locais com sucesso!");
+                if (window.saveConfigToCloud) {
+                    window.saveConfigToCloud({
+                        lotteryCode: currentCode,
+                        lotteryName: currentName,
+                        customLogoData: customLogoData,
+                        scheduleData: SCHEDULE_DATA
+                    });
+                }
+                showToast("Logotipo atualizado e salvo na nuvem com sucesso!");
             };
             reader.readAsDataURL(file);
             event.target.value = "";
@@ -1020,6 +1256,14 @@
             customLogoData = "";
             localStorage.removeItem('caixa_custom_logo');
             updateAllLogos();
+            if (window.saveConfigToCloud) {
+                window.saveConfigToCloud({
+                    lotteryCode: currentCode,
+                    lotteryName: currentName,
+                    customLogoData: "",
+                    scheduleData: SCHEDULE_DATA
+                });
+            }
             showToast("Logotipo padrão da Caixa restaurado!");
         }
 
@@ -1409,13 +1653,19 @@
                     const optimizedPng = canvas.toDataURL('image/png');
 
                     CUSTOM_GAME_LOGOS[gameName] = optimizedPng;
+                    window.CUSTOM_GAME_LOGOS = CUSTOM_GAME_LOGOS;
                     try {
                         localStorage.setItem('caixa_game_logos', JSON.stringify(CUSTOM_GAME_LOGOS));
                     } catch (err) {
                         console.error("Storage error saving game logo", err);
                     }
 
-                    showToast(`Logotipo em PNG de ${gameName} atualizado com sucesso!`, 'bg-emerald-600 text-white');
+                    // Enviar imediatamente para o Firestore para salvar globalmente e no modo anônimo
+                    if (window.saveLogosToCloud) {
+                        window.saveLogosToCloud(CUSTOM_GAME_LOGOS);
+                    }
+
+                    showToast(`Logotipo em PNG de ${gameName} atualizado e salvo na nuvem!`, 'bg-emerald-600 text-white');
                     renderScheduleManager();
                     renderTableGrid();
                     renderGamesFilterButtons();
@@ -1434,10 +1684,14 @@
         function removeGameLogo(game) {
             if (confirm(`Deseja remover o logotipo personalizado de ${game}?`)) {
                 delete CUSTOM_GAME_LOGOS[game];
+                window.CUSTOM_GAME_LOGOS = CUSTOM_GAME_LOGOS;
                 try {
                     localStorage.setItem('caixa_game_logos', JSON.stringify(CUSTOM_GAME_LOGOS));
                 } catch (err) {
                     console.error("Storage error removing game logo", err);
+                }
+                if (window.saveLogosToCloud) {
+                    window.saveLogosToCloud(CUSTOM_GAME_LOGOS);
                 }
                 showToast(`Logotipo de ${game} removido.`, 'bg-amber-600 text-white');
                 renderScheduleManager();
@@ -1454,9 +1708,13 @@
         function resetAllGameLogos() {
             if (confirm("Deseja remover os logotipos de todos os jogos?")) {
                 CUSTOM_GAME_LOGOS = {};
+                window.CUSTOM_GAME_LOGOS = CUSTOM_GAME_LOGOS;
                 try {
                     localStorage.removeItem('caixa_game_logos');
                 } catch (e) {}
+                if (window.saveLogosToCloud) {
+                    window.saveLogosToCloud(CUSTOM_GAME_LOGOS);
+                }
                 showToast("Todos os logotipos dos jogos foram removidos.", "bg-amber-600 text-white");
                 renderScheduleManager();
                 renderTableGrid();
@@ -1495,6 +1753,15 @@
                 localStorage.setItem('caixa_schedule_data', JSON.stringify(SCHEDULE_DATA));
             } catch (e) {
                 console.warn("Erro ao salvar dias de sorteio:", e);
+            }
+            // Sincronizar dias de sorteio na nuvem
+            if (window.saveConfigToCloud) {
+                window.saveConfigToCloud({
+                    lotteryCode: currentCode,
+                    lotteryName: currentName,
+                    customLogoData: customLogoData,
+                    scheduleData: SCHEDULE_DATA
+                });
             }
             rebuildGameDaysMap();
             renderTableGrid();
@@ -1706,8 +1973,18 @@
             // Atualizar links da tabela
             renderTableGrid();
 
+            // Salvar configurações gerais na nuvem Firestore
+            if (window.saveConfigToCloud) {
+                window.saveConfigToCloud({
+                    lotteryCode: currentCode,
+                    lotteryName: currentName,
+                    customLogoData: customLogoData,
+                    scheduleData: SCHEDULE_DATA
+                });
+            }
+
             if (showToastNotification) {
-                showToast("Dados salvos com sucesso!");
+                showToast("Dados salvos e sincronizados na nuvem!");
             }
         }
 
