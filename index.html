@@ -112,7 +112,7 @@
 
     <!-- 1. BARRA SUPERIOR SLIM DE ACESSIBILIDADE (COMPACTA PARA MOBILE) -->
     <section aria-label="Acessibilidade" class="bg-slate-900 text-white px-3 sm:px-4 py-1.5 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
+        <div class="max-w-7xl xl:max-w-[98vw] 2xl:max-w-[1880px] mx-auto flex justify-between items-center gap-2">
             <!-- Seletor de tamanho de letra super compacto -->
             <div class="flex items-center gap-1.5">
                 <span class="text-xs font-semibold text-slate-300">Tamanho da Letra:</span>
@@ -133,7 +133,7 @@
 
     <!-- 2. CABEÇALHO LIMPO (PURAMENTE VISUAL) -->
     <header class="bg-white text-slate-900 shadow-sm border-b-2 border-slate-200">
-        <div class="max-w-7xl xl:max-w-[97vw] 2xl:max-w-[1840px] mx-auto px-4 py-3 sm:py-3.5 xl:py-2 flex items-center justify-center sm:justify-start gap-3 sm:gap-4">
+        <div class="max-w-7xl xl:max-w-[98vw] 2xl:max-w-[1880px] mx-auto px-4 py-3 sm:py-3.5 xl:py-2.5 flex items-center justify-center sm:justify-start gap-3 sm:gap-4">
             <!-- Logotipo Trevo Caixa Oficial ou Personalizado (Visual) -->
             <div class="shrink-0 flex items-center justify-center" aria-hidden="true">
                 <div id="header-logo-container" class="w-11 h-11 flex items-center justify-center">
@@ -148,7 +148,7 @@
     </header>
 
     <!-- CORPO PRINCIPAL -->
-    <main class="flex-1 max-w-7xl xl:max-w-[97vw] 2xl:max-w-[1840px] w-full mx-auto p-3 sm:p-6 xl:p-2 2xl:p-3">
+    <main class="flex-1 max-w-7xl xl:max-w-[98vw] 2xl:max-w-[1880px] w-full mx-auto p-3 sm:p-6 xl:p-3 2xl:p-4">
 
         <!-- ================= ABA PRINCIPAL: CONSULTA DE SORTEIOS E BOLÕES (PARA OS CLIENTES IDOSOS) ================= -->
         <section id="panel-consultation" class="tab-panel active" role="region" aria-label="Consulta de Jogos e Bolões">
@@ -171,9 +171,9 @@
 
             <!-- ================= MODO: POR DIA (SEGUNDA A SÁBADO SEM BARRA DE ROLAGEM LATERAL) ================= -->
             <div id="view-mode-days" class="view-panel">
-                <div class="bg-caixa-blue text-white rounded-3xl xl:rounded-2xl p-4 sm:p-6 xl:p-2.5 2xl:p-3 shadow-2xl border-4 border-blue-900 w-full">
-                    <div class="text-center mb-5 xl:mb-2">
-                        <h2 class="text-3xl sm:text-4xl xl:text-2xl font-black text-orange-400 tracking-wide">
+                <div class="bg-caixa-blue text-white rounded-3xl xl:rounded-2xl p-4 sm:p-6 xl:p-3 2xl:p-4 shadow-2xl border-4 border-blue-900 w-full">
+                    <div class="text-center mb-5 xl:mb-2.5">
+                        <h2 class="text-3xl sm:text-4xl xl:text-2xl 2xl:text-3xl font-black text-orange-400 tracking-wide">
                             DIA DOS JOGOS
                         </h2>
 
@@ -190,67 +190,67 @@
 
                     <!-- Grade 100% responsiva (1 coluna no mobile, sem rolagem horizontal) -->
                     <div class="w-full">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5 xl:gap-2 2xl:gap-2.5 w-full">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5 xl:gap-2.5 2xl:gap-3 w-full">
                             
                             <!-- SEGUNDA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-segunda">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-2 2xl:p-2.5 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-2 shadow-md w-full" id="day-card-segunda">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-2 2xl:py-2.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">SEGUNDA</span>
                                     <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-segunda"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-2 w-full" id="grid-col-segunda"></div>
                             </div>
 
                             <!-- TERÇA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-terca">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-2 2xl:p-2.5 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-2 shadow-md w-full" id="day-card-terca">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-2 2xl:py-2.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">TERÇA</span>
                                     <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-terca"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-2 w-full" id="grid-col-terca"></div>
                             </div>
 
                             <!-- QUARTA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-quarta">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-2 2xl:p-2.5 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-2 shadow-md w-full" id="day-card-quarta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-2 2xl:py-2.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">QUARTA</span>
                                     <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-quarta"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-2 w-full" id="grid-col-quarta"></div>
                             </div>
 
                             <!-- QUINTA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-quinta">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-2 2xl:p-2.5 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-2 shadow-md w-full" id="day-card-quinta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-2 2xl:py-2.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">QUINTA</span>
                                     <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-quinta"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-2 w-full" id="grid-col-quinta"></div>
                             </div>
 
                             <!-- SEXTA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-sexta">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-2 2xl:p-2.5 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-2 shadow-md w-full" id="day-card-sexta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-2 2xl:py-2.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">SEXTA</span>
                                     <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-sexta"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-2 w-full" id="grid-col-sexta"></div>
                             </div>
 
                             <!-- SÁBADO -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-sabado">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-2 2xl:p-2.5 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-2 shadow-md w-full" id="day-card-sabado">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-2 2xl:py-2.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">SÁBADO</span>
                                     <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-sabado"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-2 w-full" id="grid-col-sabado"></div>
                             </div>
 
                         </div>
                     </div>
 
                     <!-- Rodapé da tabela com horário centralizado -->
-                    <div class="mt-6 xl:mt-2 pt-4 xl:pt-1.5 border-t border-blue-800 text-center">
+                    <div class="mt-6 xl:mt-3 pt-4 xl:pt-2 border-t border-blue-800 text-center">
                         <p class="font-black text-orange-300 text-base sm:text-lg xl:text-xs 2xl:text-sm tracking-wide uppercase">
                             HORÁRIO DOS SORTEIOS: 20h00
                         </p>
@@ -260,33 +260,33 @@
 
             <!-- ================= MODO B: FILTRAR POR JOGOS ================= -->
             <div id="view-mode-games" class="view-panel hidden">
-                <div class="bg-white rounded-3xl p-4 sm:p-8 shadow-xl border-2 border-slate-200">
+                <div class="bg-white rounded-3xl p-4 sm:p-8 xl:p-5 2xl:p-6 shadow-xl border-2 border-slate-200">
                     
                     <!-- Painel de Detalhes do Jogo Selecionado (MODALIDADE SELECIONADA) -->
-                    <div id="game-detail-panel" class="bg-blue-50/90 border-3 border-caixa-blue rounded-3xl p-5 sm:p-8 shadow-lg mb-8 hidden">
-                        <div class="flex flex-col gap-5">
-                            <div class="space-y-3">
+                    <div id="game-detail-panel" class="bg-blue-50/90 border-3 border-caixa-blue rounded-3xl xl:rounded-2xl p-5 sm:p-8 xl:p-4 2xl:p-5 shadow-lg mb-8 xl:mb-4 hidden">
+                        <div class="flex flex-col gap-5 xl:gap-3">
+                            <div class="space-y-3 xl:space-y-1.5">
                                 <div class="inline-flex items-center gap-2 bg-caixa-blue text-white text-xs sm:text-sm font-black uppercase px-4 py-1.5 rounded-full shadow-sm">
                                     <i class="fa-solid fa-dice" aria-hidden="true"></i> MODALIDADE SELECIONADA
                                 </div>
-                                <h3 class="text-3xl sm:text-5xl font-black text-caixa-blue tracking-tight" id="game-detail-title">Lotofácil</h3>
-                                <p class="text-lg sm:text-xl text-slate-800 font-bold">
+                                <h3 class="text-3xl sm:text-5xl xl:text-3xl 2xl:text-4xl font-black text-caixa-blue tracking-tight" id="game-detail-title">Lotofácil</h3>
+                                <p class="text-lg sm:text-xl xl:text-base text-slate-800 font-bold">
                                     Dias em que este jogo corre:
                                 </p>
-                                <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2.5 max-w-sm" id="game-detail-days-badges"></div>
+                                <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2.5 xl:gap-2 max-w-sm" id="game-detail-days-badges"></div>
                             </div>
 
-                            <div class="pt-2">
+                            <div class="pt-2 xl:pt-1">
                                 <a id="game-detail-bolao-link" href="#" target="_blank" rel="noopener noreferrer"
-                                    class="btn-large w-full sm:w-auto bg-caixa-orange hover:bg-orange-600 text-white font-black text-xl sm:text-2xl py-4 sm:py-5 px-8 rounded-2xl shadow-xl transition transform hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3 text-center">
-                                    <i class="fa-solid fa-ticket text-2xl" aria-hidden="true"></i>
+                                    class="btn-large w-full sm:w-auto bg-caixa-orange hover:bg-orange-600 text-white font-black text-xl sm:text-2xl xl:text-lg py-4 sm:py-5 xl:py-2.5 2xl:py-3 px-8 xl:px-6 rounded-2xl xl:rounded-xl shadow-xl transition transform hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3 text-center">
+                                    <i class="fa-solid fa-ticket text-2xl xl:text-xl" aria-hidden="true"></i>
                                     <span>Ir para o Bolão deste Jogo</span>
                                 </a>
                             </div>
 
-                            <div class="pt-2 border-t border-blue-200/80 flex items-center justify-between">
+                            <div class="pt-2 xl:pt-1 border-t border-blue-200/80 flex items-center justify-between">
                                 <button type="button" onclick="setFilterMode('days')"
-                                    class="text-sm sm:text-base font-extrabold text-caixa-blue hover:text-caixa-orange transition flex items-center gap-2 py-1">
+                                    class="text-sm sm:text-base xl:text-sm font-extrabold text-caixa-blue hover:text-caixa-orange transition flex items-center gap-2 py-1">
                                     <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
                                     <span>Voltar para a programação por dias</span>
                                 </button>
@@ -294,14 +294,14 @@
                         </div>
                     </div>
 
-                    <div class="text-center mb-6">
-                        <h4 class="text-2xl sm:text-3xl font-black text-caixa-blue">
+                    <div class="text-center mb-6 xl:mb-3">
+                        <h4 class="text-2xl sm:text-3xl xl:text-xl 2xl:text-2xl font-black text-caixa-blue">
                             Escolha um Jogo para Ver os Dias de Sorteio
                         </h4>
                     </div>
 
-                    <!-- Botões Grandes das Modalidades -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4" id="games-filter-container">
+                    <!-- Botões Grandes das Modalidades (ajustado no desktop para 6 colunas mais compactas) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 xl:gap-2.5 2xl:gap-3" id="games-filter-container">
                         <!-- Gerado dinamicamente via JS -->
                     </div>
 
@@ -1146,13 +1146,13 @@
                         ? `<img src="${logoSrc}" alt="Logo ${game}" class="w-full h-full object-contain drop-shadow" />`
                         : getGameHeartCloverSvg(game, "w-full h-full drop-shadow-sm");
 
-                    // Botão no modo POR DIA: no mobile grande, no desktop compacto para caber sem rolar
-                    item.className = `touch-card w-full relative ${cfg.textClass} font-black text-2xl sm:text-3xl md:text-3xl xl:text-xs 2xl:text-sm py-4 sm:py-5 md:py-5.5 xl:py-1.5 2xl:py-2 px-3 xl:px-1.5 rounded-2xl xl:rounded-lg shadow-md transition transform hover:scale-[1.02] active:scale-95 border-2 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-amber-300 cursor-pointer overflow-hidden text-center`;
+                    // Botão no modo POR DIA: no mobile grande, no desktop calibrado para preencher a tela sem rolar
+                    item.className = `touch-card w-full relative ${cfg.textClass} font-black text-2xl sm:text-3xl md:text-3xl xl:text-[13px] 2xl:text-[15px] py-4 sm:py-5 md:py-5.5 xl:py-2 2xl:py-2.5 px-3 xl:px-2 rounded-2xl xl:rounded-xl shadow-md transition transform hover:scale-[1.02] active:scale-95 border-2 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-amber-300 cursor-pointer overflow-hidden text-center`;
                     item.innerHTML = `
-                        <div class="absolute left-3.5 sm:left-4.5 md:left-5 xl:left-2 2xl:left-2.5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 xl:w-6 xl:h-6 2xl:w-6.5 2xl:h-6.5 flex items-center justify-center shrink-0 pointer-events-none">
+                        <div class="absolute left-3.5 sm:left-4.5 md:left-5 xl:left-2 2xl:left-2.5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 xl:w-6.5 xl:h-6.5 2xl:w-7.5 2xl:h-7.5 flex items-center justify-center shrink-0 pointer-events-none">
                             ${logoHtml}
                         </div>
-                        <span class="tracking-wider uppercase whitespace-nowrap text-center font-black pl-12 sm:pl-16 xl:pl-7 2xl:pl-8 pr-2 xl:pr-1" style="${cfg.textStyle}">${game}</span>
+                        <span class="tracking-wider uppercase whitespace-nowrap text-center font-black pl-12 sm:pl-16 xl:pl-7.5 2xl:pl-8.5 pr-2 xl:pr-1" style="${cfg.textStyle}">${game}</span>
                     `;
 
                     item.onclick = () => {
@@ -1168,7 +1168,7 @@
             selectGameDetail(game);
         }
 
-        // --- 6. RENDERIZAÇÃO DO FILTRO POR JOGOS (COM LOGO AUMENTADO À ESQUERDA E FONTE GRANDE) ---
+        // --- 6. RENDERIZAÇÃO DO FILTRO POR JOGOS (DIMINUÍDO NO DESKTOP CONFORME SOLICITADO) ---
         function renderGamesFilterButtons() {
             const container = document.getElementById('games-filter-container');
             if (!container) return;
@@ -1191,12 +1191,12 @@
                     ? `<img src="${logoSrc}" alt="Logo ${game}" class="w-full h-full object-contain drop-shadow" />`
                     : getGameHeartCloverSvg(game, "w-full h-full drop-shadow-sm");
 
-                btn.className = `touch-card w-full relative py-6 sm:py-7 md:py-8 px-4 rounded-2xl font-black text-2xl sm:text-3xl md:text-4xl shadow-lg transition transform hover:scale-[1.02] active:scale-95 text-center flex items-center justify-center border-2 ${cfg.textClass} focus:outline-none focus:ring-4 focus:ring-orange-300 cursor-pointer overflow-hidden`;
+                btn.className = `touch-card w-full relative py-6 sm:py-7 md:py-8 xl:py-3.5 2xl:py-4 px-4 xl:px-3 rounded-2xl xl:rounded-xl font-black text-2xl sm:text-3xl md:text-4xl xl:text-base 2xl:text-lg shadow-lg transition transform hover:scale-[1.02] active:scale-95 text-center flex items-center justify-center border-2 ${cfg.textClass} focus:outline-none focus:ring-4 focus:ring-orange-300 cursor-pointer overflow-hidden`;
                 btn.innerHTML = `
-                    <div class="absolute left-4 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center shrink-0 pointer-events-none">
+                    <div class="absolute left-4 sm:left-6 md:left-8 xl:left-3 2xl:left-3.5 top-1/2 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 xl:w-8 xl:h-8 2xl:w-9 2xl:h-9 flex items-center justify-center shrink-0 pointer-events-none">
                         ${logoHtml}
                     </div>
-                    <span class="tracking-wider uppercase font-black text-center pl-16 sm:pl-20 pr-4" style="${cfg.textStyle}">${game}</span>
+                    <span class="tracking-wider uppercase font-black text-center whitespace-nowrap pl-16 sm:pl-20 xl:pl-11 2xl:pl-12 pr-4 xl:pr-2" style="${cfg.textStyle}">${game}</span>
                 `;
 
                 btn.onclick = () => selectGameDetail(game);
