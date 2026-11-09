@@ -1,0 +1,6 @@
+{
+  "name": "Gerenciador de Bolões e Brindes Caixa",
+  "description": "Aplicação web completa para gerenciamento de brindes, gerador de QR Code SVG transparente para CorelDRAW e consulta de bolões e sorteios das lotéricas Caixa com alta acessibilidade para idosos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

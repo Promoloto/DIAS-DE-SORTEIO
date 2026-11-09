@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Bolões e Brindes Caixa</title>
+    <meta name="description" content="Aplicação web completa para gerenciamento de brindes, gerador de QR Code SVG transparente para CorelDRAW e consulta de bolões e sorteios das lotéricas Caixa com alta acessibilidade para idosos." />
+    <meta property="og:title" content="Gerenciador de Bolões e Brindes Caixa" />
+    <meta property="og:description" content="Aplicação web completa para gerenciamento de brindes, gerador de QR Code SVG transparente para CorelDRAW e consulta de bolões e sorteios das lotéricas Caixa com alta acessibilidade para idosos." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- CDN Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        caixa: {
+                            blue: '#003366',
+                            bluedark: '#002244',
+                            bluelight: '#0b4d8c',
+                            orange: '#F26522',
+                            orangedark: '#d44e0e',
+                            orangelight: '#ff7b3d',
+                            graybg: '#f1f5f9'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --font-scale: 1rem;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-size: var(--font-scale);
+            overflow-x: hidden;
+        }
+
+        /* Cores oficiais Caixa */
+        .bg-caixa-blue { background-color: #003366; }
+        .text-caixa-blue { color: #003366; }
+        .border-caixa-blue { border-color: #003366; }
+        .bg-caixa-orange { background-color: #F26522; }
+        .text-caixa-orange { color: #F26522; }
+        .border-caixa-orange { border-color: #F26522; }
+
+        /* Estilos de acessibilidade e clique para idosos */
+        .btn-large {
+            min-height: 56px;
+            touch-action: manipulation;
+        }
+        .touch-card {
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* Animações suaves */
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.25s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Placa preview para impressão */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #plaque-preview-printable, #plaque-preview-printable * {
+                visibility: visible;
+            }
+            #plaque-preview-printable {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 20px;
+                background: white !important;
+                color: black !important;
+                border: 2px solid #003366 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-100 text-slate-800 antialiased">
+
+    <!-- 1. BARRA SUPERIOR SLIM DE ACESSIBILIDADE (COMPACTA PARA MOBILE) -->
+    <section aria-label="Acessibilidade" class="bg-slate-900 text-white px-3 sm:px-4 py-1.5 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex justify-between items-center gap-2">
+            <!-- Seletor de tamanho de letra super compacto -->
+            <div class="flex items-center gap-1.5">
+                <span class="text-xs font-semibold text-slate-300">Tamanho da Letra:</span>
+                <div class="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700">
+                    <button type="button" onclick="setFontScale(1)" id="font-scale-1" title="Tamanho normal" aria-label="Tamanho da letra normal" class="px-2.5 py-0.5 text-xs font-bold rounded-md bg-caixa-orange text-white">A</button>
+                    <button type="button" onclick="setFontScale(1.15)" id="font-scale-2" title="Tamanho grande" aria-label="Tamanho da letra grande" class="px-3.5 py-1.5 text-xs font-bold rounded-md text-slate-300 hover:text-white">A+</button>
+                    <button type="button" onclick="setFontScale(1.3)" id="font-scale-3" title="Tamanho extra grande" aria-label="Tamanho da letra extra grande" class="px-4.5 py-2.5 text-xs font-bold rounded-md text-slate-300 hover:text-white">A++</button>
+                </div>
+            </div>
+            
+            <!-- Botão de voz para idosos -->
+            <button type="button" onclick="speakTodayGames()" id="btn-speak" title="Ouvir os jogos de hoje em voz alta" class="bg-blue-800 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow transition shrink-0">
+                <i class="fa-solid fa-volume-high text-caixa-orange" aria-hidden="true"></i>
+                <span>Ouvir Jogos</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 2. CABEÇALHO LIMPO (PURAMENTE VISUAL) -->
+    <header class="bg-white text-slate-900 shadow-sm border-b-2 border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:py-3.5 flex items-center justify-center sm:justify-start gap-3 sm:gap-4">
+            <!-- Logotipo Trevo Caixa Oficial ou Personalizado (Visual) -->
+            <div class="shrink-0 flex items-center justify-center" aria-hidden="true">
+                <div id="header-logo-container" class="w-11 h-11 flex items-center justify-center">
+                    <!-- Injetado dinamicamente via updateAllLogos() -->
+                </div>
+            </div>
+            <!-- Nome da Lotérica em destaque -->
+            <h1 class="text-2xl sm:text-3xl font-black text-caixa-blue tracking-tight truncate" id="header-lottery-name">
+                Lotérica Pé Quente
+            </h1>
+        </div>
+    </header>
+
+    <!-- CORPO PRINCIPAL -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6">
+
+        <!-- ================= ABA PRINCIPAL: CONSULTA DE SORTEIOS E BOLÕES (PARA OS CLIENTES IDOSOS) ================= -->
+        <section id="panel-consultation" class="tab-panel active" role="region" aria-label="Consulta de Jogos e Bolões">
+
+            <!-- FILTROS PRINCIPAIS: APENAS 2 BOTÕES ("POR JOGO" ou "POR DIA") -->
+            <div class="mb-5 mt-2">
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto" role="group" aria-label="Modo de Visualização">
+                    <button type="button" onclick="setFilterMode('games')" id="filter-btn-games"
+                        class="btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue">
+                        <i class="fa-solid fa-dice text-xl sm:text-2xl text-caixa-orange" aria-hidden="true"></i>
+                        <span>POR JOGO</span>
+                    </button>
+                    <button type="button" onclick="setFilterMode('days')" id="filter-btn-days"
+                        class="btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue">
+                        <i class="fa-solid fa-calendar-week text-xl sm:text-2xl text-orange-400" aria-hidden="true"></i>
+                        <span>POR DIA</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= MODO: POR DIA (SEGUNDA A SÁBADO SEM BARRA DE ROLAGEM LATERAL) ================= -->
+            <div id="view-mode-days" class="view-panel">
+                <div class="bg-caixa-blue text-white rounded-3xl p-4 sm:p-6 shadow-2xl border-4 border-blue-900 w-full">
+                    <div class="text-center mb-5">
+                        <h2 class="text-3xl sm:text-4xl font-black text-orange-400 tracking-wide">
+                            DIA DOS JOGOS
+                        </h2>
+
+                        <!-- Atalhos de navegação rápida de dias para facilitar ainda mais para idosos no celular -->
+                        <div class="flex flex-wrap justify-center gap-2 mt-4" aria-label="Pular para dia da semana">
+                            <button type="button" onclick="scrollToDay('segunda')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">SEG</button>
+                            <button type="button" onclick="scrollToDay('terca')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">TER</button>
+                            <button type="button" onclick="scrollToDay('quarta')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">QUA</button>
+                            <button type="button" onclick="scrollToDay('quinta')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">QUI</button>
+                            <button type="button" onclick="scrollToDay('sexta')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">SEX</button>
+                            <button type="button" onclick="scrollToDay('sabado')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">SÁB</button>
+                        </div>
+                    </div>
+
+                    <!-- Grade 100% responsiva (1 coluna no mobile, sem rolagem horizontal) -->
+                    <div class="w-full">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5 w-full">
+                            
+                            <!-- SEGUNDA -->
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-segunda">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                                    <span class="tracking-wider text-[#003366] font-black">SEGUNDA</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                </div>
+                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-segunda"></div>
+                            </div>
+
+                            <!-- TERÇA -->
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-terca">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                                    <span class="tracking-wider text-[#003366] font-black">TERÇA</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                </div>
+                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-terca"></div>
+                            </div>
+
+                            <!-- QUARTA -->
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-quarta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                                    <span class="tracking-wider text-[#003366] font-black">QUARTA</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                </div>
+                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-quarta"></div>
+                            </div>
+
+                            <!-- QUINTA -->
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-quinta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                                    <span class="tracking-wider text-[#003366] font-black">QUINTA</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                </div>
+                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-quinta"></div>
+                            </div>
+
+                            <!-- SEXTA -->
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-sexta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                                    <span class="tracking-wider text-[#003366] font-black">SEXTA</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                </div>
+                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-sexta"></div>
+                            </div>
+
+                            <!-- SÁBADO -->
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-sabado">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                                    <span class="tracking-wider text-[#003366] font-black">SÁBADO</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                </div>
+                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-sabado"></div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Rodapé da tabela com horário centralizado -->
+                    <div class="mt-6 pt-4 border-t border-blue-800 text-center">
+                        <p class="font-black text-orange-300 text-base sm:text-lg tracking-wide uppercase">
+                            HORÁRIO DOS SORTEIOS: 20h00
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= MODO B: FILTRAR POR JOGOS ================= -->
+            <div id="view-mode-games" class="view-panel hidden">
+                <div class="bg-white rounded-3xl p-4 sm:p-8 shadow-xl border-2 border-slate-200">
+                    
+                    <!-- Painel de Detalhes do Jogo Selecionado (MODALIDADE SELECIONADA) -->
+                    <div id="game-detail-panel" class="bg-blue-50/90 border-3 border-caixa-blue rounded-3xl p-5 sm:p-8 shadow-lg mb-8 hidden">
+                        <div class="flex flex-col gap-5">
+                            <div class="space-y-3">
+                                <div class="inline-flex items-center gap-2 bg-caixa-blue text-white text-xs sm:text-sm font-black uppercase px-4 py-1.5 rounded-full shadow-sm">
+                                    <i class="fa-solid fa-dice" aria-hidden="true"></i> MODALIDADE SELECIONADA
+                                </div>
+                                <h3 class="text-3xl sm:text-5xl font-black text-caixa-blue tracking-tight" id="game-detail-title">Lotofácil</h3>
+                                <p class="text-lg sm:text-xl text-slate-800 font-bold">
+                                    Dias em que este jogo corre:
+                                </p>
+                                <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2.5 max-w-sm" id="game-detail-days-badges"></div>
+                            </div>
+
+                            <div class="pt-2">
+                                <a id="game-detail-bolao-link" href="#" target="_blank" rel="noopener noreferrer"
+                                    class="btn-large w-full sm:w-auto bg-caixa-orange hover:bg-orange-600 text-white font-black text-xl sm:text-2xl py-4 sm:py-5 px-8 rounded-2xl shadow-xl transition transform hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3 text-center">
+                                    <i class="fa-solid fa-ticket text-2xl" aria-hidden="true"></i>
+                                    <span>Ir para o Bolão deste Jogo</span>
+                                </a>
+                            </div>
+
+                            <div class="pt-2 border-t border-blue-200/80 flex items-center justify-between">
+                                <button type="button" onclick="setFilterMode('days')"
+                                    class="text-sm sm:text-base font-extrabold text-caixa-blue hover:text-caixa-orange transition flex items-center gap-2 py-1">
+                                    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                                    <span>Voltar para a programação por dias</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-6">
+                        <h4 class="text-2xl sm:text-3xl font-black text-caixa-blue">
+                            Escolha um Jogo para Ver os Dias de Sorteio
+                        </h4>
+                    </div>
+
+                    <!-- Botões Grandes das Modalidades -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4" id="games-filter-container">
+                        <!-- Gerado dinamicamente via JS -->
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ================= 3. PAINEL ADMINISTRATIVO & QR CODE CORELDRAW (ACESSO OCULTO POR 3 CLIQUES EM "BY PROMOLOTO") ================= -->
+        <section id="panel-admin" class="tab-panel" role="region" aria-label="Painel Administrativo">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                <!-- COLUNA ESQUERDA: FORMULÁRIO DE CONFIGURAÇÃO -->
+                <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+                    <form id="admin-form" onsubmit="event.preventDefault(); applyAdminChanges();" class="space-y-6">
+                        
+                        <!-- Campo 1: URL Fixa com Entrada Exclusiva de 4 Dígitos -->
+                        <div>
+                            <label for="input-lottery-code" class="block text-lg font-black text-slate-800 mb-1.5">
+                                Link do Bolão Caixa (Código de 4 dígitos):
+                            </label>
+                            
+                            <!-- Card Integrado com Endereço Fixo e Entrada dos 4 Dígitos -->
+                            <div class="rounded-2xl border-2 border-slate-300 focus-within:border-caixa-blue focus-within:ring-4 focus-within:ring-blue-100 bg-white overflow-hidden transition shadow-xs">
+                                <!-- BARRA SUPERIOR: ENDEREÇO DE URL FIXO -->
+                                <div class="bg-slate-100 border-b border-slate-200 px-4 py-2.5 flex items-center justify-between text-xs text-slate-600 gap-2">
+                                    <div class="flex items-center gap-2 font-mono truncate" title="https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/">
+                                        <i class="fa-solid fa-link text-caixa-blue text-xs shrink-0"></i>
+                                        <span class="font-bold text-slate-700 select-all truncate">https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/</span>
+                                    </div>
+                                    <span class="text-[11px] font-black uppercase tracking-wider text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded shrink-0">Fixo</span>
+                                </div>
+                                
+                                <!-- BARRA INFERIOR: ENTRADA APENAS DOS 4 DÍGITOS -->
+                                <div class="p-3 sm:p-4 flex items-center gap-3 bg-white">
+                                    <div class="flex items-center gap-2 text-slate-400 text-lg shrink-0">
+                                        <i class="fa-solid fa-hashtag text-caixa-orange"></i>
+                                        <span class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Código:</span>
+                                    </div>
+                                    <input type="text" id="input-lottery-code" value="0806" maxlength="4" inputmode="numeric"
+                                        class="flex-1 p-2 text-2xl sm:text-3xl font-black text-slate-900 tracking-widest focus:outline-none bg-transparent placeholder-slate-300"
+                                        placeholder="0806">
+                                    <span class="hidden sm:inline-block text-xs font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg shrink-0">
+                                        4 Números
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-xs sm:text-sm text-slate-500 mt-2 px-1">
+                                <span>URL fixa. Digite apenas os <strong>4 números</strong> da sua lotérica.</span>
+                                <span class="font-extrabold text-caixa-orange bg-orange-50 px-2.5 py-0.5 rounded-lg border border-orange-200">
+                                    Código: <strong id="detected-code-badge">0806</strong>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Campo 2: Nome da Lotérica -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="input-lottery-name" class="block text-lg font-black text-slate-800">
+                                    Nome da Lotérica:
+                                </label>
+                                <span id="lottery-lookup-spinner" class="hidden text-xs font-bold text-caixa-blue flex items-center gap-1.5">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Identificando na Caixa...
+                                </span>
+                            </div>
+                            <div class="relative">
+                                <input type="text" id="input-lottery-name" value="Lotérica Pé Quente"
+                                    class="w-full p-4 pl-12 pr-28 rounded-2xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-base sm:text-lg font-bold text-slate-800 transition"
+                                    placeholder="Ex: 0806 ou digite o nome da lotérica">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">
+                                    <i class="fa-solid fa-store" aria-hidden="true"></i>
+                                </div>
+                                <button type="button" onclick="triggerManualNameLookup()" 
+                                    class="absolute right-2.5 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-caixa-blue text-xs font-black rounded-xl border border-blue-200 transition active:scale-95 flex items-center gap-1 cursor-pointer"
+                                    title="Identificar nome oficial pelo código da Caixa">
+                                    <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                                </button>
+                            </div>
+                            <div id="lottery-name-status-box" class="hidden"></div>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-1 px-1">
+                                Ao digitar o código ou link, o nome oficial é identificado automaticamente e preenchido aqui. Você pode editá-lo livremente antes de salvar.
+                            </p>
+                        </div>
+
+                        <!-- Campo 2.1: Upload do Logotipo da Caixa / Lotérica -->
+                        <div>
+                            <label class="block text-lg font-black text-slate-800 mb-1.5">
+                                Logotipo Oficial (Upload):
+                            </label>
+                            <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border-2 border-slate-200">
+                                <div id="admin-logo-preview" class="w-16 h-16 bg-white p-2 rounded-xl border border-slate-300 shadow-xs flex items-center justify-center shrink-0">
+                                    <!-- Injetado via updateAllLogos() -->
+                                </div>
+                                <div class="flex-1 space-y-2 w-full text-center sm:text-left">
+                                    <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+                                        <button type="button" onclick="triggerLogoUpload()"
+                                            class="px-4 py-2 bg-caixa-blue hover:bg-blue-900 text-white rounded-xl font-bold text-sm shadow transition flex items-center gap-2 cursor-pointer">
+                                            <i class="fa-solid fa-cloud-arrow-up text-orange-400"></i>
+                                            <span>Enviar Novo Logo</span>
+                                        </button>
+                                        <button type="button" onclick="resetToDefaultLogo()" id="btn-reset-logo"
+                                            class="px-3.5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition flex items-center gap-1.5 cursor-pointer hidden">
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                            <span>Restaurar Padrão Caixa</span>
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-slate-500">
+                                        Substitui o logotipo em todos os locais (cabeçalho da página, preview da plaquinha e exportações). Aceita arquivos SVG, PNG ou JPG.
+                                    </p>
+                                    <!-- Input exclusivo do Painel Administrativo -->
+                                    <input type="file" id="admin-logo-file-input" accept="image/*,.svg" onchange="handleLogoUpload(event)" class="hidden">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botão Salvar -->
+                        <button type="submit"
+                            class="btn-large w-full bg-caixa-blue hover:bg-blue-900 text-white font-black text-xl py-4 rounded-2xl shadow-xl transition transform hover:scale-[1.01] flex items-center justify-center gap-3 focus:ring-4 focus:ring-blue-300 cursor-pointer">
+                            <i class="fa-solid fa-floppy-disk text-2xl text-orange-400" aria-hidden="true"></i>
+                            <span>SALVAR</span>
+                        </button>
+
+                        <!-- Botão para voltar à visão do cliente -->
+                        <button type="button" onclick="returnToClientView()"
+                            class="w-full text-center text-sm sm:text-base font-extrabold text-slate-500 hover:text-caixa-blue py-3 rounded-xl hover:bg-slate-50 transition flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            <span>Voltar para a Consulta de Jogos</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- COLUNA DIREITA: PREVIEW DO BRINDE / PLAQUINHA & EXPORTAÇÕES -->
+                <div class="lg:col-span-6 space-y-6">
+                    
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                            <div>
+                                <h3 class="text-xl sm:text-2xl font-black text-caixa-blue">Preview do QR Code</h3>
+                                <p class="text-xs sm:text-sm text-slate-500 font-semibold">QR Code transparente para CorelDRAW e impressão</p>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-black px-3 py-1 rounded-full border border-green-300 flex items-center gap-1">
+                                <i class="fa-solid fa-check" aria-hidden="true"></i> Vetor SVG Pronto
+                            </span>
+                        </div>
+
+                        <!-- PREVIEW VISUAL DO QR CODE (APENAS O QR CODE) -->
+                        <div id="plaque-preview-printable" class="bg-gradient-to-b from-caixa-blue via-blue-950 to-slate-950 text-white p-6 sm:p-10 rounded-3xl shadow-2xl border-4 border-orange-400 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all">
+                            
+                            <!-- Borda decorativa de destaque -->
+                            <div class="absolute inset-0 border border-white/10 rounded-2xl pointer-events-none"></div>
+
+                            <!-- CONTAINER DO QR CODE (FUNDO BRANCO PARA LEITURA FÁCIL) -->
+                            <div class="bg-white p-4 sm:p-6 rounded-3xl shadow-2xl inline-flex items-center justify-center border-4 border-slate-200" id="qr-preview-wrapper">
+                                <div id="qr-code-svg-render" class="flex items-center justify-center">
+                                    <!-- SVG renderizado via JavaScript -->
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- BOTÃO DE AÇÃO (COREL DRAW & VETOR) -->
+                        <div class="mt-6 space-y-2">
+                            <button type="button" onclick="downloadQrCodeSvg()"
+                                class="btn-large w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-4 px-6 rounded-2xl shadow-xl transition transform hover:scale-[1.01] flex items-center justify-center gap-3 focus:ring-4 focus:ring-emerald-300 cursor-pointer">
+                                <i class="fa-solid fa-download text-2xl" aria-hidden="true"></i>
+                                <span>Baixar QR Code SVG</span>
+                            </button>
+                            <p class="text-xs sm:text-sm text-slate-500 text-center font-medium">
+                                <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
+                                Arquivo SVG vetorial com fundo 100% vazado e preto CMYK 100%. No CorelDRAW, use <strong>Arquivo > Importar (Ctrl+I)</strong> ou arraste o arquivo baixado para a tela.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- NOVA CAIXA NO PAINEL DO ADMINISTRADOR: ALTERAR DIAS DE SORTEIO DOS JOGOS -->
+            <div id="schedule-manager-box" class="mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+                <div class="border-b border-slate-200 pb-5 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-caixa-blue to-blue-700 text-white flex items-center justify-center text-2xl shadow-md shrink-0">
+                            <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-black text-caixa-blue">Alterar Dias de Sorteio e Logotipos dos Jogos</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 font-semibold">Altere os dias de sorteio e clique no quadrado de cada jogo para fazer upload do logotipo PNG oficial. O logo aparecerá no mesmo tamanho à esquerda do botão de cada jogo na página inicial.</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="resetAllGameLogos()"
+                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-rose-700 rounded-xl font-bold text-xs transition flex items-center gap-1.5 border border-slate-300 cursor-pointer"
+                            title="Remover logotipos de todos os jogos">
+                            <i class="fa-solid fa-trash-can text-rose-500"></i>
+                            <span>Limpar Logos</span>
+                        </button>
+                        <button type="button" onclick="resetScheduleToDefault()"
+                            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition flex items-center gap-1.5 border border-slate-300 cursor-pointer"
+                            title="Restaurar dias oficiais de sorteio da Caixa">
+                            <i class="fa-solid fa-rotate-left text-slate-500"></i>
+                            <span>Restaurar Padrão Caixa</span>
+                        </button>
+                        <span class="inline-flex items-center gap-1.5 bg-blue-100 text-caixa-blue text-xs font-black px-3 py-1.5 rounded-full border border-blue-300">
+                            <i class="fa-solid fa-shield-halved"></i> 11 Jogos Oficiais
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Input invisível para upload de logo PNG por jogo -->
+                <input type="file" id="game-logo-file-input" accept="image/*" class="hidden" onchange="handleGameLogoFileSelected(event)" />
+
+                <!-- LISTA DE JOGOS E SEUS BOTÕES DE DIAS DA SEMANA -->
+                <div class="space-y-3" id="schedule-manager-games-list">
+                    <!-- Renderizado dinamicamente via renderScheduleManager() -->
+                </div>
+
+                <!-- BARRA DE AÇÃO INFERIOR -->
+                <div class="mt-8 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p class="text-xs sm:text-sm text-slate-500 font-medium text-center sm:text-left">
+                        <i class="fa-solid fa-circle-info text-caixa-blue mr-1"></i>
+                        Clique nos botões dos dias (<strong>SEG, TER, QUA, QUI, SEX, SÁB</strong>) para ligar ou desligar o sorteio de qualquer jogo.
+                    </p>
+                    <button type="button" onclick="saveScheduleChanges(true)"
+                        class="btn-large w-full sm:w-auto bg-caixa-blue hover:bg-blue-900 text-white font-black text-lg py-3.5 px-8 rounded-2xl shadow-xl transition transform hover:scale-[1.01] flex items-center justify-center gap-2.5 focus:ring-4 focus:ring-blue-300 cursor-pointer">
+                        <i class="fa-solid fa-floppy-disk text-xl text-orange-400" aria-hidden="true"></i>
+                        <span>SALVAR DIAS DE SORTEIO</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- NOVA CAIXA NO PAINEL DO ADMINISTRADOR: CRIADOR DE QR CODE EM SVG PERSONALIZADO -->
+            <div id="custom-qr-creator-box" class="mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+                <div class="border-b border-slate-200 pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-caixa-blue to-blue-700 text-white flex items-center justify-center text-2xl shadow-md shrink-0">
+                            <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-black text-caixa-blue">Criador de QR Code em SVG</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 font-semibold">Crie QR Codes vetoriais (fundo vazado e CMYK 100%) para uso próprio ou impressão</p>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 self-start sm:self-center bg-orange-100 text-caixa-orange text-xs font-black px-3.5 py-1.5 rounded-full border border-orange-300">
+                        <i class="fa-solid fa-vector-square"></i> Fundo 100% Vazado • CMYK 100%
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <!-- CONTROLES (SELEÇÃO, ENTRADA E BOTÕES) -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <!-- Caixa de Seleção das 5 Opções -->
+                        <div>
+                            <label for="custom-qr-type" class="block text-base sm:text-lg font-black text-slate-800 mb-2">
+                                Tipo de QR Code:
+                            </label>
+                            <div class="relative">
+                                <select id="custom-qr-type" onchange="handleCustomQrTypeChange()"
+                                    class="w-full p-4 pl-12 pr-10 rounded-2xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-base sm:text-lg font-bold text-slate-800 bg-white transition cursor-pointer appearance-none shadow-sm">
+                                    <option value="link">Link/Url</option>
+                                    <option value="whatsapp">Whatsapp</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="mapa">Mapa</option>
+                                </select>
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-caixa-blue text-lg pointer-events-none" id="custom-qr-select-icon">
+                                    <i class="fa-solid fa-link"></i>
+                                </div>
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campo de Entrada Dinâmico -->
+                        <div>
+                            <label for="custom-qr-input" id="custom-qr-input-label" class="block text-base sm:text-lg font-black text-slate-800 mb-2">
+                                Cole ou digite o Link:
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="custom-qr-input"
+                                    class="w-full p-4 pl-12 rounded-2xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-base sm:text-lg font-bold text-slate-800 transition shadow-sm"
+                                    placeholder="https://">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none" id="custom-qr-input-icon">
+                                    <i class="fa-solid fa-globe"></i>
+                                </div>
+                            </div>
+                            <p id="custom-qr-hint" class="text-xs sm:text-sm text-slate-500 mt-2 px-1">
+                                Digite ou cole o link livremente para onde o QR Code deve apontar.
+                            </p>
+                        </div>
+
+                        <!-- BOTÕES DE AÇÃO: "GERAR" e "BAIXAR QR CODE" -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                            <button type="button" onclick="generateCustomQrCode(true)"
+                                class="btn-large w-full bg-caixa-blue hover:bg-blue-900 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-xl transition transform hover:scale-[1.01] flex items-center justify-center gap-2.5 focus:ring-4 focus:ring-blue-300 cursor-pointer">
+                                <i class="fa-solid fa-bolt text-xl text-amber-300" aria-hidden="true"></i>
+                                <span>GERAR</span>
+                            </button>
+                            <button type="button" onclick="downloadCustomQrCodeSvg()"
+                                class="btn-large w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-xl transition transform hover:scale-[1.01] flex items-center justify-center gap-2.5 focus:ring-4 focus:ring-emerald-300 cursor-pointer">
+                                <i class="fa-solid fa-download text-xl" aria-hidden="true"></i>
+                                <span>BAIXAR QR CODE</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PREVIEW VISUAL DO QR CODE GERADO -->
+                    <div class="lg:col-span-5 flex flex-col items-center">
+                        <div class="w-full bg-gradient-to-b from-caixa-blue via-blue-950 to-slate-950 text-white p-6 rounded-3xl shadow-2xl border-4 border-orange-400 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                            <div class="text-xs font-bold text-orange-300 tracking-wider uppercase mb-3 flex items-center gap-1.5">
+                                <i class="fa-solid fa-eye"></i> Preview do Vetor Gerado
+                            </div>
+                            <!-- Container com Fundo Branco para Leitura -->
+                            <div class="bg-white p-4 rounded-2xl shadow-2xl inline-flex items-center justify-center border-4 border-slate-200">
+                                <div id="custom-qr-svg-render" class="flex items-center justify-center">
+                                    <!-- Renderizado via JavaScript -->
+                                </div>
+                            </div>
+                            <div class="mt-4 px-2 w-full">
+                                <div class="bg-blue-900/80 rounded-xl p-2.5 border border-blue-700/60 text-left">
+                                    <div class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Destino codificado:</div>
+                                    <div id="custom-qr-dest-text" class="text-xs font-mono font-bold text-amber-300 truncate mt-0.5">https://...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 text-center font-medium mt-3">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
+                            Exportação em arquivo <strong>.SVG</strong> com fundo 100% vazado e vetor preto CMYK 100%. Pronto para CorelDRAW.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 transition-all duration-300 transform translate-y-24 opacity-0 z-50 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-green-400 text-xl" id="toast-icon" aria-hidden="true"></i>
+        <span class="font-bold text-sm sm:text-base" id="toast-message">Operação realizada com sucesso!</span>
+    </div>
+
+    <!-- 4. RODAPÉ MINIMALISTA: APENAS O LINK "By PROMOLOTO" (3 CLIQUES PARA DESBLOQUEAR O PAINEL) -->
+    <footer class="py-6 mt-8 text-center border-t border-slate-200">
+        <button type="button" id="btn-promoloto" onclick="handlePromolotoClick(event)"
+            class="text-xs font-black tracking-widest text-slate-400 hover:text-slate-700 transition uppercase cursor-pointer py-2 px-4 rounded-xl focus:outline-none"
+            title="By PROMOLOTO">
+            By PROMOLOTO
+        </button>
+    </footer>
+
+    <!-- JAVASCRIPT DA APLICAÇÃO (EMBUTIDO E 100% AUTO-CONTIDO) -->
+    <script>
+        // --- 1. DADOS OFICIAIS DOS DIAS DE SORTEIO DA CAIXA (11 JOGOS) ---
+        const DEFAULT_SCHEDULE_DATA = {
+            "Segunda": ["Lotofácil", "Quina", "Dupla Sena", "Lotomania", "Super Sete", "Loteca"],
+            "Terça": ["Mega-Sena", "Lotofácil", "Quina", "Timemania", "Dia de Sorte"],
+            "Quarta": ["Lotofácil", "Quina", "+Milionária", "Dupla Sena", "Lotomania", "Super Sete", "Federal"],
+            "Quinta": ["Mega-Sena", "Lotofácil", "Quina", "Timemania", "Dia de Sorte"],
+            "Sexta": ["Lotofácil", "Quina", "Dupla Sena", "Lotomania", "Super Sete"],
+            "Sábado": ["Mega-Sena", "Lotofácil", "Quina", "+Milionária", "Timemania", "Dia de Sorte", "Federal"]
+        };
+
+        const DAYS_OF_WEEK = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+        function loadSavedSchedule() {
+            try {
+                const saved = localStorage.getItem('caixa_schedule_data');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && typeof parsed === 'object') {
+                        DAYS_OF_WEEK.forEach(d => {
+                            if (!Array.isArray(parsed[d])) parsed[d] = [];
+                        });
+                        // Garantir inclusão da Loteca caso venha de um salvamento anterior
+                        const hasLoteca = Object.values(parsed).some(arr => arr && arr.includes("Loteca"));
+                        if (!hasLoteca && parsed["Segunda"]) {
+                            parsed["Segunda"].push("Loteca");
+                        }
+                        return parsed;
+                    }
+                }
+            } catch (e) {
+                console.warn("Erro ao carregar dias de sorteio salvos:", e);
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_SCHEDULE_DATA));
+        }
+
+        let SCHEDULE_DATA = loadSavedSchedule();
+
+        // 11 Jogos Oficiais da Caixa (10 do banner físico + Loteria Federal)
+        const ALL_GAMES = [
+            "Mega-Sena",
+            "Lotofácil",
+            "Quina",
+            "+Milionária",
+            "Dupla Sena",
+            "Lotomania",
+            "Timemania",
+            "Dia de Sorte",
+            "Loteca",
+            "Super Sete",
+            "Federal"
+        ];
+
+        // Configuração exata de cores, bordas, textos e trevo de corações extraídos do banner oficial
+        const GAME_CONFIG = {
+            "Mega-Sena": {
+                name: "Mega-Sena",
+                bgHex: "#009e49",
+                borderHex: "#007a38",
+                textClass: "text-white",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.4);",
+                color1: "#ffffff",
+                color2: "#8fe8ab",
+                icon: "fa-clover"
+            },
+            "Lotofácil": {
+                name: "Lotofácil",
+                bgHex: "#93126f",
+                borderHex: "#770e59",
+                textClass: "text-white",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.4);",
+                color1: "#ffffff",
+                color2: "#f8a8db",
+                icon: "fa-star"
+            },
+            "Quina": {
+                name: "Quina",
+                bgHex: "#261c6b",
+                borderHex: "#1a124e",
+                textClass: "text-white",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.4);",
+                color1: "#ffffff",
+                color2: "#c4b5fd",
+                icon: "fa-gem"
+            },
+            "+Milionária": {
+                name: "+Milionária",
+                bgHex: "#1a2d5a",
+                borderHex: "#101f40",
+                textClass: "text-[#f26f21]",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.5); font-weight: 900;",
+                color1: "#f26f21",
+                color2: "#fba879",
+                icon: "fa-crown"
+            },
+            "Dupla Sena": {
+                name: "Dupla Sena",
+                bgHex: "#a51e39",
+                borderHex: "#82162b",
+                textClass: "text-white",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.4);",
+                color1: "#ffffff",
+                color2: "#fda4af",
+                icon: "fa-dice-two"
+            },
+            "Lotomania": {
+                name: "Lotomania",
+                bgHex: "#f37324",
+                borderHex: "#d4580e",
+                textClass: "text-white",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.4);",
+                color1: "#ffffff",
+                color2: "#fed7aa",
+                icon: "fa-circle-dot"
+            },
+            "Timemania": {
+                name: "Timemania",
+                bgHex: "#feed01",
+                borderHex: "#d9c900",
+                textClass: "text-white",
+                textStyle: "text-shadow: -1.5px -1.5px 0 #008e36, 1.5px -1.5px 0 #008e36, -1.5px 1.5px 0 #008e36, 1.5px 1.5px 0 #008e36, 0 2px 4px rgba(0,0,0,0.35);",
+                color1: "#008e36",
+                color2: "#8fe8ab",
+                icon: "fa-futbol"
+            },
+            "Dia de Sorte": {
+                name: "Dia de Sorte",
+                bgHex: "#faa61a",
+                borderHex: "#d48607",
+                textClass: "text-white",
+                textStyle: "text-shadow: -1.5px -1.5px 0 #4a2800, 1.5px -1.5px 0 #4a2800, -1.5px 1.5px 0 #4a2800, 1.5px 1.5px 0 #4a2800, 0 2px 4px rgba(0,0,0,0.3);",
+                color1: "#ffffff",
+                color2: "#4a2800",
+                icon: "fa-sun"
+            },
+            "Loteca": {
+                name: "Loteca",
+                bgHex: "#d81e28",
+                borderHex: "#b0151e",
+                textClass: "text-white",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.4);",
+                color1: "#ffffff",
+                color2: "#fecaca",
+                icon: "fa-trophy"
+            },
+            "Super Sete": {
+                name: "Super Sete",
+                bgHex: "#94c11f",
+                borderHex: "#779c16",
+                textClass: "text-white",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.4);",
+                color1: "#ffffff",
+                color2: "#bef264",
+                icon: "fa-bolt"
+            },
+            "Federal": {
+                name: "Federal",
+                bgHex: "#0066b3",
+                borderHex: "#004e8a",
+                textClass: "text-white",
+                textStyle: "text-shadow: 0 1px 3px rgba(0,0,0,0.4);",
+                color1: "#ffffff",
+                color2: "#bae6fd",
+                icon: "fa-landmark"
+            }
+        };
+
+        const GAME_COLOR_CLASSES = GAME_CONFIG;
+
+        // Gerador vetorial do novo trevo oficial da Caixa com ângulos corretos (45°, 135°, 225°, 315°)
+        // e coloração de lados opostos idêntica ao banner oficial
+        function getGameHeartCloverSvg(game, sizeClass = "w-7 h-7", sw = 7.5) {
+            const cfg = GAME_CONFIG[game] || {
+                color1: "#ffffff",
+                color2: "#ffffff"
+            };
+            const c1 = cfg.color1 || "#ffffff";
+            const c2 = cfg.color2 || "#ffffff";
+
+            // Geometria oficial do novo trevo da Caixa
+            const petalD = "M 48 43.5 L 20 43.5 C 12 43.5 7 38 7 29 C 7 20 13 14 22 14 C 27 14 30.5 17.5 32.5 22 C 34.5 17.5 38 14 43 14 C 47 14 48 16 48 24";
+
+            return `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="${sizeClass} shrink-0 inline-block align-middle" aria-hidden="true">
+                <!-- Top-Left (135°) - Cor 1 -->
+                <path d="${petalD}" stroke="${c1}" stroke-width="${sw}" stroke-linecap="butt" stroke-linejoin="round"/>
+                
+                <!-- Top-Right (45°) - Cor 2 (Rotacionado 90° no sentido horário) -->
+                <g transform="rotate(90 50 50)">
+                    <path d="${petalD}" stroke="${c2}" stroke-width="${sw}" stroke-linecap="butt" stroke-linejoin="round"/>
+                </g>
+                
+                <!-- Bottom-Right (315°) - Cor 1 (Rotacionado 180° - Lado oposto com mesma cor 1) -->
+                <g transform="rotate(180 50 50)">
+                    <path d="${petalD}" stroke="${c1}" stroke-width="${sw}" stroke-linecap="butt" stroke-linejoin="round"/>
+                </g>
+                
+                <!-- Bottom-Left (225°) - Cor 2 (Rotacionado 270° - Lado oposto com mesma cor 2) -->
+                <g transform="rotate(270 50 50)">
+                    <path d="${petalD}" stroke="${c2}" stroke-width="${sw}" stroke-linecap="butt" stroke-linejoin="round"/>
+                </g>
+            </svg>`;
+        }
+
+        // Mapeamento inverso: Jogo -> Dias em que é sorteado
+        let GAME_DAYS_MAP = {};
+        function rebuildGameDaysMap() {
+            GAME_DAYS_MAP = {};
+            ALL_GAMES.forEach(game => {
+                GAME_DAYS_MAP[game] = [];
+                for (const [day, games] of Object.entries(SCHEDULE_DATA)) {
+                    if (games && games.includes(game)) {
+                        GAME_DAYS_MAP[game].push(day);
+                    }
+                }
+            });
+        }
+        rebuildGameDaysMap();
+
+        // --- 2. ESTADO DA APLICAÇÃO ---
+        let currentLink = localStorage.getItem('caixa_bolao_link') || "https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/4832";
+        let currentCode = localStorage.getItem('caixa_bolao_code') || "4832";
+        let currentName = localStorage.getItem('caixa_bolao_name') || "Lotérica Pé Quente";
+        let currentQRColor = "#000000"; // Padrão automático: CMYK 100, 100, 100, 100% (Preto Puro para CorelDRAW)
+        let customLogoData = localStorage.getItem('caixa_custom_logo') || "";
+        let generatedSvgString = "";
+
+        // Logotipos personalizados de cada jogo (armazenados em base64 PNG no localStorage)
+        let CUSTOM_GAME_LOGOS = {};
+        try {
+            const savedLogos = localStorage.getItem('caixa_game_logos');
+            if (savedLogos) {
+                CUSTOM_GAME_LOGOS = JSON.parse(savedLogos);
+            }
+        } catch (e) {
+            console.warn("Não foi possível carregar logos salvos:", e);
+            CUSTOM_GAME_LOGOS = {};
+        }
+        let currentGameForLogoUpload = null;
+
+        // Logotipo Oficial da Caixa atualizado com a geometria exata do novo logotipo
+        const DEFAULT_CAIXA_CLOVER_SVG = `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-label="Trevo Caixa Oficial">
+            <!-- Top-Left (135°) - Azul Caixa -->
+            <path d="M 48 43.5 L 20 43.5 C 12 43.5 7 38 7 29 C 7 20 13 14 22 14 C 27 14 30.5 17.5 32.5 22 C 34.5 17.5 38 14 43 14 C 47 14 48 16 48 24" stroke="#003366" stroke-width="7.5" stroke-linecap="butt" stroke-linejoin="round"/>
+            <!-- Top-Right (45°) - Laranja Caixa -->
+            <g transform="rotate(90 50 50)">
+                <path d="M 48 43.5 L 20 43.5 C 12 43.5 7 38 7 29 C 7 20 13 14 22 14 C 27 14 30.5 17.5 32.5 22 C 34.5 17.5 38 14 43 14 C 47 14 48 16 48 24" stroke="#F26522" stroke-width="7.5" stroke-linecap="butt" stroke-linejoin="round"/>
+            </g>
+            <!-- Bottom-Right (315°) - Azul Caixa (Lado oposto) -->
+            <g transform="rotate(180 50 50)">
+                <path d="M 48 43.5 L 20 43.5 C 12 43.5 7 38 7 29 C 7 20 13 14 22 14 C 27 14 30.5 17.5 32.5 22 C 34.5 17.5 38 14 43 14 C 47 14 48 16 48 24" stroke="#003366" stroke-width="7.5" stroke-linecap="butt" stroke-linejoin="round"/>
+            </g>
+            <!-- Bottom-Left (225°) - Laranja Caixa (Lado oposto) -->
+            <g transform="rotate(270 50 50)">
+                <path d="M 48 43.5 L 20 43.5 C 12 43.5 7 38 7 29 C 7 20 13 14 22 14 C 27 14 30.5 17.5 32.5 22 C 34.5 17.5 38 14 43 14 C 47 14 48 16 48 24" stroke="#F26522" stroke-width="7.5" stroke-linecap="butt" stroke-linejoin="round"/>
+            </g>
+        </svg>`;
+
+        // Controle dos 3 cliques em "By PROMOLOTO"
+        let promoLotoClickCount = 0;
+        let promoLotoTimer = null;
+
+        // --- 3. INICIALIZAÇÃO ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Preencher inputs salvos
+            const codeInputEl = document.getElementById('input-lottery-code');
+            if (codeInputEl) codeInputEl.value = currentCode;
+            const nameInputEl = document.getElementById('input-lottery-name');
+            if (nameInputEl) nameInputEl.value = currentName;
+
+            // Renderizar componentes
+            updateAllLogos();
+            renderTableGrid();
+            renderGamesFilterButtons();
+            highlightCurrentDayOfWeek();
+            applyAdminChanges(false);
+
+            // Escutar digitação ao vivo no código de 4 dígitos da lotérica
+            if (codeInputEl) {
+                codeInputEl.addEventListener('input', (e) => {
+                    let val = e.target.value;
+                    let detected = extractCode(val);
+
+                    // Se não for colar de link completo, mantém apenas números até 4 dígitos
+                    if (!val.includes('/')) {
+                        const rawDigits = val.replace(/\D/g, '').slice(0, 4);
+                        e.target.value = rawDigits;
+                        detected = rawDigits ? rawDigits.padStart(4, '0') : "";
+                    } else {
+                        e.target.value = detected;
+                    }
+
+                    const badge = document.getElementById('detected-code-badge');
+                    if (badge) badge.innerText = e.target.value || "----";
+
+                    if (e.target.value.length >= 3) {
+                        clearTimeout(lookupDebounceTimer);
+                        lookupDebounceTimer = setTimeout(() => {
+                            lookupAndFillLotteryName(e.target.value.padStart(4, '0'), false);
+                        }, 450);
+                    }
+                });
+            }
+
+            // Escutar digitação no campo de nome: se o usuário digitar o código numérico (ex: 0806),
+            // detectamos e preenchemos o nome oficial automaticamente sem salvar!
+            if (nameInputEl) {
+                nameInputEl.addEventListener('input', (e) => {
+                    const val = e.target.value.trim();
+                    const digitsMatch = val.match(/^(\d{3,6})$/);
+                    if (digitsMatch) {
+                        clearTimeout(lookupDebounceTimer);
+                        lookupDebounceTimer = setTimeout(() => {
+                            const code = digitsMatch[1].slice(-4).padStart(4, '0');
+                            if (codeInputEl) codeInputEl.value = code;
+                            const badge = document.getElementById('detected-code-badge');
+                            if (badge) badge.innerText = code;
+                            lookupAndFillLotteryName(code, true);
+                        }, 500);
+                    }
+                });
+            }
+
+            // Inicializar o gerador de QR Code personalizado
+            handleCustomQrTypeChange();
+            generateCustomQrCode(false);
+
+            // Inicializar o gerenciador de dias de sorteio
+            renderScheduleManager();
+        });
+
+        // --- GESTÃO DE LOGO PERSONALIZADO (UPLOAD E SUBSTITUIÇÃO GLOBAL) ---
+        function triggerLogoUpload() {
+            const input = document.getElementById('admin-logo-file-input');
+            if (input) input.click();
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const result = e.target.result;
+                customLogoData = result;
+                try {
+                    localStorage.setItem('caixa_custom_logo', result);
+                } catch (err) {
+                    console.warn("Storage quota exceeded", err);
+                }
+                updateAllLogos();
+                showToast("Logotipo atualizado em todos os locais com sucesso!");
+            };
+            reader.readAsDataURL(file);
+            event.target.value = "";
+        }
+
+        function resetToDefaultLogo() {
+            customLogoData = "";
+            localStorage.removeItem('caixa_custom_logo');
+            updateAllLogos();
+            showToast("Logotipo padrão da Caixa restaurado!");
+        }
+
+        function updateAllLogos() {
+            const headerContainer = document.getElementById('header-logo-container');
+            const plaqueContainer = document.getElementById('plaque-logo-container');
+            const adminPreviewContainer = document.getElementById('admin-logo-preview');
+            const resetBtn = document.getElementById('btn-reset-logo');
+
+            if (customLogoData) {
+                const imgHtml = `<img src="${customLogoData}" alt="Logotipo Atualizado" class="w-full h-full object-contain" />`;
+                if (headerContainer) headerContainer.innerHTML = imgHtml;
+                if (plaqueContainer) plaqueContainer.innerHTML = imgHtml;
+                if (adminPreviewContainer) adminPreviewContainer.innerHTML = imgHtml;
+                if (resetBtn) resetBtn.classList.remove('hidden');
+            } else {
+                if (headerContainer) headerContainer.innerHTML = DEFAULT_CAIXA_CLOVER_SVG;
+                if (plaqueContainer) plaqueContainer.innerHTML = DEFAULT_CAIXA_CLOVER_SVG;
+                if (adminPreviewContainer) adminPreviewContainer.innerHTML = DEFAULT_CAIXA_CLOVER_SVG;
+                if (resetBtn) resetBtn.classList.add('hidden');
+            }
+        }
+
+        // --- 4. FUNÇÕES DE NAVEGAÇÃO E ACESSO RESTRITO POR 3 CLIQUES ---
+        function handlePromolotoClick(e) {
+            if (e) e.preventDefault();
+
+            // Se o painel administrativo já estiver ativo, um clique no rodapé retorna à tela principal
+            const adminPanel = document.getElementById('panel-admin');
+            if (adminPanel && adminPanel.classList.contains('active')) {
+                returnToClientView();
+                return;
+            }
+
+            promoLotoClickCount++;
+
+            clearTimeout(promoLotoTimer);
+            promoLotoTimer = setTimeout(() => {
+                promoLotoClickCount = 0;
+            }, 2500);
+
+            if (promoLotoClickCount >= 3) {
+                promoLotoClickCount = 0;
+                clearTimeout(promoLotoTimer);
+                openAdminPanel();
+            } else if (promoLotoClickCount === 2) {
+                showToast("Clique mais 1 vez para abrir o Painel Administrativo");
+            }
+        }
+
+        function openAdminPanel() {
+            document.getElementById('panel-consultation').classList.remove('active');
+            document.getElementById('panel-admin').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast("Painel & QR Code desbloqueado!");
+        }
+
+        function returnToClientView() {
+            document.getElementById('panel-admin').classList.remove('active');
+            document.getElementById('panel-consultation').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Modos de Visualização na Consulta: "POR JOGO" ou "POR DIA"
+        function setFilterMode(mode) {
+            const viewDays = document.getElementById('view-mode-days');
+            const viewGames = document.getElementById('view-mode-games');
+            const btnDays = document.getElementById('filter-btn-days');
+            const btnGames = document.getElementById('filter-btn-games');
+
+            if (mode === 'days') {
+                if (viewDays) viewDays.classList.remove('hidden');
+                if (viewGames) viewGames.classList.add('hidden');
+                if (btnDays) btnDays.className = "btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue";
+                if (btnGames) btnGames.className = "btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue";
+            } else {
+                if (viewGames) viewGames.classList.remove('hidden');
+                if (viewDays) viewDays.classList.add('hidden');
+                if (btnGames) btnGames.className = "btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue";
+                if (btnDays) btnDays.className = "btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue";
+            }
+        }
+
+        function scrollToDay(dayId) {
+            const el = document.getElementById('day-card-' + dayId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // --- 5. RENDERIZAÇÃO DA TABELA COMPLETA COM TREVO DE CORAÇÕES E CORES DO BANNER ---
+        function renderTableGrid() {
+            const daysMap = [
+                { name: "Segunda", colId: "grid-col-segunda" },
+                { name: "Terça", colId: "grid-col-terca" },
+                { name: "Quarta", colId: "grid-col-quarta" },
+                { name: "Quinta", colId: "grid-col-quinta" },
+                { name: "Sexta", colId: "grid-col-sexta" },
+                { name: "Sábado", colId: "grid-col-sabado" }
+            ];
+
+            daysMap.forEach(d => {
+                const container = document.getElementById(d.colId);
+                if (!container) return;
+                container.innerHTML = "";
+
+                SCHEDULE_DATA[d.name].forEach(game => {
+                    const cfg = GAME_CONFIG[game] || {
+                        bgHex: "#003366",
+                        borderHex: "#002244",
+                        textClass: "text-white",
+                        textStyle: ""
+                    };
+                    const item = document.createElement('button');
+                    item.type = "button";
+                    item.setAttribute('aria-label', `Ver detalhes e bolão de ${game}`);
+
+                    const logoSrc = CUSTOM_GAME_LOGOS[game];
+                    item.style.backgroundColor = cfg.bgHex;
+                    item.style.borderColor = cfg.borderHex;
+
+                    // Logotipo: PNG personalizado upado ou trevo oficial vetorizado
+                    const logoHtml = logoSrc 
+                        ? `<img src="${logoSrc}" alt="Logo ${game}" class="w-full h-full object-contain drop-shadow" />`
+                        : getGameHeartCloverSvg(game, "w-full h-full drop-shadow-sm");
+
+                    // Botão no modo POR DIA: logo aumentado na extremidade esquerda e fonte grande em destaque
+                    item.className = `touch-card w-full relative ${cfg.textClass} font-black text-2xl sm:text-3xl md:text-3xl lg:text-base xl:text-lg 2xl:text-2xl py-4 sm:py-5 md:py-5.5 px-3 rounded-2xl shadow-md transition transform hover:scale-[1.02] active:scale-95 border-2 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-amber-300 cursor-pointer overflow-hidden text-center`;
+                    item.innerHTML = `
+                        <div class="absolute left-3.5 sm:left-4.5 md:left-5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 flex items-center justify-center shrink-0 pointer-events-none">
+                            ${logoHtml}
+                        </div>
+                        <span class="tracking-wider uppercase whitespace-nowrap text-center font-black pl-12 sm:pl-16 pr-2 sm:pr-4" style="${cfg.textStyle}">${game}</span>
+                    `;
+
+                    item.onclick = () => {
+                        openGameDetailView(game);
+                    };
+                    container.appendChild(item);
+                });
+            });
+        }
+
+        function openGameDetailView(game) {
+            setFilterMode('games');
+            selectGameDetail(game);
+        }
+
+        // --- 6. RENDERIZAÇÃO DO FILTRO POR JOGOS (COM LOGO AUMENTADO À ESQUERDA E FONTE GRANDE) ---
+        function renderGamesFilterButtons() {
+            const container = document.getElementById('games-filter-container');
+            if (!container) return;
+            container.innerHTML = "";
+
+            ALL_GAMES.forEach(game => {
+                const cfg = GAME_CONFIG[game] || {
+                    bgHex: "#003366",
+                    borderHex: "#002244",
+                    textClass: "text-white",
+                    textStyle: ""
+                };
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.style.backgroundColor = cfg.bgHex;
+                btn.style.borderColor = cfg.borderHex;
+
+                const logoSrc = CUSTOM_GAME_LOGOS[game];
+                const logoHtml = logoSrc 
+                    ? `<img src="${logoSrc}" alt="Logo ${game}" class="w-full h-full object-contain drop-shadow" />`
+                    : getGameHeartCloverSvg(game, "w-full h-full drop-shadow-sm");
+
+                btn.className = `touch-card w-full relative py-6 sm:py-7 md:py-8 px-4 rounded-2xl font-black text-2xl sm:text-3xl md:text-4xl shadow-lg transition transform hover:scale-[1.02] active:scale-95 text-center flex items-center justify-center border-2 ${cfg.textClass} focus:outline-none focus:ring-4 focus:ring-orange-300 cursor-pointer overflow-hidden`;
+                btn.innerHTML = `
+                    <div class="absolute left-4 sm:left-6 md:left-8 top-1/2 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center shrink-0 pointer-events-none">
+                        ${logoHtml}
+                    </div>
+                    <span class="tracking-wider uppercase font-black text-center pl-16 sm:pl-20 pr-4" style="${cfg.textStyle}">${game}</span>
+                `;
+
+                btn.onclick = () => selectGameDetail(game);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectGameDetail(game) {
+            const panel = document.getElementById('game-detail-panel');
+            if (!panel) return;
+            panel.classList.remove('hidden');
+
+            const cfg = GAME_CONFIG[game] || {
+                bgHex: "#003366",
+                borderHex: "#002244",
+                textClass: "text-white",
+                textStyle: ""
+            };
+
+            const titleEl = document.getElementById('game-detail-title');
+            if (titleEl) {
+                const logoSrc = CUSTOM_GAME_LOGOS[game];
+                const logoHtml = logoSrc 
+                    ? `<img src="${logoSrc}" alt="Logo ${game}" class="w-full h-full object-contain drop-shadow" />`
+                    : getGameHeartCloverSvg(game, "w-full h-full drop-shadow-sm");
+                titleEl.innerHTML = `
+                    <div class="inline-flex items-center justify-center gap-4">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center">
+                            ${logoHtml}
+                        </div>
+                        <span class="text-3xl sm:text-5xl font-black tracking-wider uppercase inline-block" style="${cfg.textStyle}">${game}</span>
+                    </div>
+                `;
+            }
+
+            const days = GAME_DAYS_MAP[game] || [];
+            const badgesContainer = document.getElementById('game-detail-days-badges');
+            badgesContainer.innerHTML = "";
+
+            days.forEach(day => {
+                const span = document.createElement('span');
+                span.className = "text-white text-base sm:text-lg font-black px-4 py-2.5 rounded-xl shadow text-center inline-block";
+                span.style.backgroundColor = cfg.bgHex;
+                span.style.border = `2px solid ${cfg.borderHex}`;
+                span.innerText = day + "-feira";
+                badgesContainer.appendChild(span);
+            });
+
+            const link = document.getElementById('game-detail-bolao-link');
+            if (link) {
+                link.href = currentLink;
+                link.setAttribute('aria-label', `Comprar bolão oficial da Caixa para ${game}`);
+            }
+
+            setTimeout(() => {
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 60);
+        }
+
+        // --- 6.1 GERENCIADOR DE DIAS DE SORTEIO DOS JOGOS (ADMINISTRATIVO) ---
+        function renderScheduleManager() {
+            const container = document.getElementById('schedule-manager-games-list');
+            if (!container) return;
+
+            const daysShort = {
+                "Segunda": "SEG",
+                "Terça": "TER",
+                "Quarta": "QUA",
+                "Quinta": "QUI",
+                "Sexta": "SEX",
+                "Sábado": "SÁB"
+            };
+
+            let html = "";
+            ALL_GAMES.forEach(game => {
+                const cfg = GAME_CONFIG[game] || {
+                    bgHex: "#003366",
+                    borderHex: "#002244",
+                    textClass: "text-white",
+                    textStyle: "",
+                    icon: "fa-ticket"
+                };
+                const activeDays = GAME_DAYS_MAP[game] || [];
+                const activeDaysText = activeDays.length > 0
+                    ? activeDays.map(d => daysShort[d]).join(', ')
+                    : '<span class="text-rose-500 font-bold">Nenhum dia ativo</span>';
+
+                let dayButtonsHtml = "";
+                DAYS_OF_WEEK.forEach(day => {
+                    const isActive = activeDays.includes(day);
+                    const shortName = daysShort[day];
+                    if (isActive) {
+                        dayButtonsHtml += `
+                            <button type="button" onclick="toggleGameScheduleDay('${game}', '${day}')"
+                                class="py-2.5 px-1 sm:px-2 text-center font-black text-xs sm:text-sm rounded-xl transition bg-caixa-blue text-white shadow-sm ring-2 ring-blue-300 border-2 border-caixa-blue hover:bg-blue-900 cursor-pointer flex flex-col items-center justify-center"
+                                title="Desmarcar ${day} para ${game}">
+                                <span class="tracking-wide">${shortName}</span>
+                                <span class="text-[10px] text-amber-300 font-black">✓ Sim</span>
+                            </button>
+                        `;
+                    } else {
+                        dayButtonsHtml += `
+                            <button type="button" onclick="toggleGameScheduleDay('${game}', '${day}')"
+                                class="py-2.5 px-1 sm:px-2 text-center font-bold text-xs sm:text-sm rounded-xl transition bg-white text-slate-400 hover:text-slate-800 hover:bg-slate-100 border-2 border-slate-200 cursor-pointer flex flex-col items-center justify-center"
+                                title="Marcar ${day} para ${game}">
+                                <span class="tracking-wide">${shortName}</span>
+                                <span class="text-[10px] text-slate-300 font-normal">Não</span>
+                            </button>
+                        `;
+                    }
+                });
+
+                html += `
+                    <div class="p-3.5 sm:p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-300 bg-slate-50/70 transition flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+                        <div class="flex items-center gap-3.5 min-w-[240px]">
+                            <!-- Quadrado destacado para Upload de Logo PNG individual do jogo -->
+                            <div class="relative group/logo shrink-0">
+                                <button type="button" onclick="triggerGameLogoUpload('${game}')"
+                                    class="w-12 h-12 rounded-xl flex items-center justify-center shadow-md shrink-0 font-black relative overflow-hidden transition transform hover:scale-105 active:scale-95 cursor-pointer border-2"
+                                    style="background-color: ${cfg.bgHex}; border-color: ${cfg.borderHex};"
+                                    title="Clique para fazer upload do logotipo PNG de ${game}">
+                                    ${
+                                        CUSTOM_GAME_LOGOS[game]
+                                            ? `<img src="${CUSTOM_GAME_LOGOS[game]}" alt="Logo ${game}" class="w-full h-full object-contain p-1" />`
+                                            : `<div class="flex flex-col items-center justify-center ${cfg.textClass}">
+                                                 <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                                                 <span class="text-[8px] font-black uppercase tracking-tighter mt-0.5">LOGO</span>
+                                               </div>`
+                                    }
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/logo:opacity-100 flex flex-col items-center justify-center transition text-white text-[10px] font-bold">
+                                        <i class="fa-solid fa-camera text-xs"></i>
+                                        <span class="text-[8px] font-black uppercase tracking-tighter mt-0.5">Upload</span>
+                                    </div>
+                                </button>
+                                ${
+                                    CUSTOM_GAME_LOGOS[game]
+                                        ? `<button type="button" onclick="event.stopPropagation(); removeGameLogo('${game}')" class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-[10px] shadow border-2 border-white cursor-pointer z-10" title="Remover logotipo de ${game}">
+                                            <i class="fa-solid fa-xmark"></i>
+                                           </button>`
+                                        : ''
+                                }
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-base sm:text-lg font-black text-slate-900 leading-tight">${game}</span>
+                                    ${
+                                        CUSTOM_GAME_LOGOS[game]
+                                            ? `<span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-check text-[9px]"></i> PNG Ativo</span>`
+                                            : `<button type="button" onclick="triggerGameLogoUpload('${game}')" class="text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"><i class="fa-solid fa-upload text-[10px] mr-1"></i>Upload Logo</button>`
+                                    }
+                                </div>
+                                <div class="text-xs text-slate-500 font-medium mt-0.5">
+                                    <span>Dias ativos:</span> <strong class="text-slate-800">${activeDaysText}</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-6 gap-1.5 sm:gap-2 flex-1 max-w-xl">
+                            ${dayButtonsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Funções para Upload e Gerenciamento de Logotipo PNG individual de cada jogo
+        function triggerGameLogoUpload(game) {
+            currentGameForLogoUpload = game;
+            const input = document.getElementById('game-logo-file-input');
+            if (input) {
+                input.value = '';
+                input.click();
+            }
+        }
+
+        function handleGameLogoFileSelected(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file || !currentGameForLogoUpload) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('Por favor, selecione um arquivo de imagem válido (PNG, SVG, JPG, etc).', 'bg-rose-600 text-white');
+                event.target.value = '';
+                return;
+            }
+
+            const gameName = currentGameForLogoUpload;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                const img = new Image();
+                img.onload = function() {
+                    const maxDim = 320;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) {
+                            h = Math.round((h * maxDim) / w);
+                            w = maxDim;
+                        } else {
+                            w = Math.round((w * maxDim) / h);
+                            h = maxDim;
+                        }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const optimizedPng = canvas.toDataURL('image/png');
+
+                    CUSTOM_GAME_LOGOS[gameName] = optimizedPng;
+                    try {
+                        localStorage.setItem('caixa_game_logos', JSON.stringify(CUSTOM_GAME_LOGOS));
+                    } catch (err) {
+                        console.error("Storage error saving game logo", err);
+                    }
+
+                    showToast(`Logotipo em PNG de ${gameName} atualizado com sucesso!`, 'bg-emerald-600 text-white');
+                    renderScheduleManager();
+                    renderTableGrid();
+                    renderGamesFilterButtons();
+                    
+                    const detailPanel = document.getElementById('game-detail-panel');
+                    if (detailPanel && !detailPanel.classList.contains('hidden')) {
+                        selectGameDetail(gameName);
+                    }
+                };
+                img.src = dataUrl;
+                event.target.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeGameLogo(game) {
+            if (confirm(`Deseja remover o logotipo personalizado de ${game}?`)) {
+                delete CUSTOM_GAME_LOGOS[game];
+                try {
+                    localStorage.setItem('caixa_game_logos', JSON.stringify(CUSTOM_GAME_LOGOS));
+                } catch (err) {
+                    console.error("Storage error removing game logo", err);
+                }
+                showToast(`Logotipo de ${game} removido.`, 'bg-amber-600 text-white');
+                renderScheduleManager();
+                renderTableGrid();
+                renderGamesFilterButtons();
+                
+                const detailPanel = document.getElementById('game-detail-panel');
+                if (detailPanel && !detailPanel.classList.contains('hidden')) {
+                    selectGameDetail(game);
+                }
+            }
+        }
+
+        function resetAllGameLogos() {
+            if (confirm("Deseja remover os logotipos de todos os jogos?")) {
+                CUSTOM_GAME_LOGOS = {};
+                try {
+                    localStorage.removeItem('caixa_game_logos');
+                } catch (e) {}
+                showToast("Todos os logotipos dos jogos foram removidos.", "bg-amber-600 text-white");
+                renderScheduleManager();
+                renderTableGrid();
+                renderGamesFilterButtons();
+
+                const detailPanel = document.getElementById('game-detail-panel');
+                if (detailPanel && !detailPanel.classList.contains('hidden')) {
+                    const titleEl = document.getElementById('game-detail-title');
+                    if (titleEl) {
+                        const currentTitle = titleEl.innerText.trim();
+                        const matchedGame = ALL_GAMES.find(g => currentTitle.includes(g));
+                        if (matchedGame) selectGameDetail(matchedGame);
+                    }
+                }
+            }
+        }
+
+        function toggleGameScheduleDay(game, day) {
+            if (!SCHEDULE_DATA[day]) {
+                SCHEDULE_DATA[day] = [];
+            }
+            const idx = SCHEDULE_DATA[day].indexOf(game);
+            if (idx >= 0) {
+                SCHEDULE_DATA[day].splice(idx, 1);
+            } else {
+                SCHEDULE_DATA[day].push(game);
+                SCHEDULE_DATA[day].sort((a, b) => ALL_GAMES.indexOf(a) - ALL_GAMES.indexOf(b));
+            }
+            rebuildGameDaysMap();
+            renderScheduleManager();
+            saveScheduleChanges(false);
+        }
+
+        function saveScheduleChanges(showToastNotice = true) {
+            try {
+                localStorage.setItem('caixa_schedule_data', JSON.stringify(SCHEDULE_DATA));
+            } catch (e) {
+                console.warn("Erro ao salvar dias de sorteio:", e);
+            }
+            rebuildGameDaysMap();
+            renderTableGrid();
+            renderGamesFilterButtons();
+            renderScheduleManager();
+
+            // Atualiza painel de detalhe do jogo se estiver visível
+            const detailPanel = document.getElementById('game-detail-panel');
+            if (detailPanel && !detailPanel.classList.contains('hidden')) {
+                const titleEl = document.getElementById('game-detail-title');
+                if (titleEl) {
+                    const currentTitle = titleEl.innerText.trim();
+                    const matchedGame = ALL_GAMES.find(g => currentTitle.includes(g));
+                    if (matchedGame) {
+                        selectGameDetail(matchedGame);
+                    }
+                }
+            }
+
+            if (showToastNotice) {
+                showToast("Dias de sorteio atualizados e salvos com sucesso!");
+            }
+        }
+
+        function resetScheduleToDefault() {
+            SCHEDULE_DATA = JSON.parse(JSON.stringify(DEFAULT_SCHEDULE_DATA));
+            saveScheduleChanges(false);
+            renderScheduleManager();
+            showToast("Dias de sorteio restaurados para o padrão oficial da Caixa!");
+        }
+
+        // --- 7. DETECÇÃO E EXTRAÇÃO DO CÓDIGO DA LOTÉRICA ---
+        let lastLookedUpCode = "";
+        let lookupDebounceTimer = null;
+
+        function extractCode(input) {
+            if (!input) return "0806";
+            const trimmed = input.trim();
+            const urlMatch = trimmed.match(/bolao-caixa\/(\d{1,6})/i) || trimmed.match(/\/(\d{3,6})(?:\/|$)/);
+            if (urlMatch && urlMatch[1]) return urlMatch[1].slice(-4).padStart(4, '0');
+            const digitsOnly = trimmed.replace(/\D/g, '');
+            if (digitsOnly.length > 0) return digitsOnly.slice(-4).padStart(4, '0');
+            return "0806";
+        }
+
+        function formatLotteryName(rawName) {
+            if (!rawName) return "";
+            const clean = rawName.trim().replace(/\s+/g, ' ');
+            const lowerWords = ['da', 'de', 'do', 'dos', 'das', 'e', 'em', 'no', 'na', 'nos', 'nas'];
+            return clean.toLowerCase().split(' ').map((word, i) => {
+                if (word === 'ltda' || word === 'ltda.') return 'Ltda';
+                if (word === 'me' || word === 'me.') return 'ME';
+                if (word === 'epp' || word === 'epp.') return 'EPP';
+                if (word === 's/a' || word === 'sa') return 'S/A';
+                if (i > 0 && lowerWords.includes(word)) return word;
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }).join(' ');
+        }
+
+        async function lookupAndFillLotteryName(code, userInitiated = false) {
+            if (!code) return;
+            const cleanCode = code.replace(/\D/g, '');
+            if (cleanCode.length < 3) return;
+
+            if (!userInitiated && cleanCode === lastLookedUpCode) return;
+            lastLookedUpCode = cleanCode;
+
+            const spinner = document.getElementById('lottery-lookup-spinner');
+            const statusBox = document.getElementById('lottery-name-status-box');
+            const nameInput = document.getElementById('input-lottery-name');
+
+            if (spinner) spinner.classList.remove('hidden');
+            if (statusBox) {
+                statusBox.className = "mt-2 p-2.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-xs sm:text-sm flex items-center gap-2";
+                statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-caixa-blue"></i> Identificando nome da lotérica para o código <strong>${cleanCode}</strong> na Caixa...`;
+                statusBox.classList.remove('hidden');
+            }
+
+            // Dicionário de contingência rápida
+            const offlineLotteries = {
+                "0806": "Loterica General da Sorte Ltda",
+                "806": "Loterica General da Sorte Ltda",
+                "4832": "Lotérica Pé Quente"
+            };
+
+            let identifiedName = null;
+            let cityState = "";
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4500);
+
+                const response = await fetch(`/api/loterica/${cleanCode}`, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.payload && data.payload.length > 0) {
+                        const item = data.payload[0];
+                        const rawName = item.nomeFantasia || item.nome || "";
+                        if (rawName) {
+                            identifiedName = formatLotteryName(rawName);
+                            const city = (item.nomeMunicipio || '').trim();
+                            const uf = (item.nomeUF || '').trim();
+                            if (city || uf) {
+                                cityState = `${city} - ${uf}`.replace(/^-\s*|\s*-$/g, '');
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("Falha ao consultar API da Caixa via proxy:", err);
+            }
+
+            // Fallback se necessário
+            if (!identifiedName && offlineLotteries[cleanCode]) {
+                identifiedName = offlineLotteries[cleanCode];
+            }
+
+            if (spinner) spinner.classList.add('hidden');
+
+            if (identifiedName) {
+                // IMPORTANTE: Apenas preenche o campo! NÃO salva e NÃO chama applyAdminChanges!
+                if (nameInput) {
+                    nameInput.value = identifiedName;
+                }
+
+                if (statusBox) {
+                    statusBox.className = "mt-2 p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-900 text-xs sm:text-sm flex items-start gap-2.5";
+                    statusBox.innerHTML = `
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-base shrink-0 mt-0.5"></i>
+                        <div class="flex-1">
+                            <p class="font-bold">Nome oficial identificado: <span class="text-emerald-950 font-black underline decoration-emerald-400 decoration-2">${identifiedName}</span>${cityState ? ` <span class="text-slate-500 font-normal">(${cityState})</span>` : ''}</p>
+                            <p class="text-emerald-800 mt-1 text-xs">
+                                ✓ O campo acima foi preenchido. <strong>Não foi salvo automaticamente</strong> para permitir que você edite se desejar. Clique em "Salvar e Atualizar Preview" quando concluir.
+                            </p>
+                        </div>
+                    `;
+                    statusBox.classList.remove('hidden');
+                }
+            } else {
+                if (statusBox) {
+                    statusBox.className = "mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs sm:text-sm flex items-start gap-2";
+                    statusBox.innerHTML = `
+                        <i class="fa-solid fa-circle-info text-amber-600 text-base shrink-0 mt-0.5"></i>
+                        <div class="flex-1">
+                            <p class="font-bold">Não foi encontrado nome oficial para o código ${cleanCode}.</p>
+                            <p class="text-amber-800 text-xs mt-0.5">Você pode digitar o nome da sua lotérica manualmente no campo acima.</p>
+                        </div>
+                    `;
+                    statusBox.classList.remove('hidden');
+                }
+            }
+        }
+
+        function triggerManualNameLookup() {
+            const codeInput = document.getElementById('input-lottery-code');
+            const nameInput = document.getElementById('input-lottery-name');
+            
+            let code = "";
+            const nameDigits = nameInput ? nameInput.value.match(/(\d{3,6})/) : null;
+            if (nameDigits) {
+                code = nameDigits[1].slice(-4).padStart(4, '0');
+            } else if (codeInput) {
+                code = extractCode(codeInput.value);
+            }
+            if (code) {
+                lookupAndFillLotteryName(code, true);
+            }
+        }
+
+        // --- 9. ATUALIZAÇÃO DOS DADOS ADMINISTRATIVOS ---
+        function applyAdminChanges(showToastNotification = true) {
+            const codeInput = document.getElementById('input-lottery-code');
+            const nameInput = document.getElementById('input-lottery-name');
+
+            const rawVal = codeInput ? codeInput.value.trim() : "";
+            currentCode = extractCode(rawVal);
+            currentName = (nameInput && nameInput.value.trim()) || "Lotérica Pé Quente";
+            currentQRColor = "#000000"; // CMYK 100, 100, 100, 100% (Preto Puro)
+
+            // URL fixa oficial da Caixa com os 4 dígitos finais
+            currentLink = `https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/${currentCode}`;
+
+            // Sincronizar campo com os 4 dígitos
+            if (codeInput) {
+                codeInput.value = currentCode;
+            }
+
+            // Persistir localmente no navegador
+            localStorage.setItem('caixa_bolao_link', currentLink);
+            localStorage.setItem('caixa_bolao_code', currentCode);
+            localStorage.setItem('caixa_bolao_name', currentName);
+            localStorage.setItem('caixa_bolao_qrcolor', "#000000");
+
+            // Atualizar UI
+            const headerNameEl = document.getElementById('header-lottery-name');
+            if (headerNameEl) headerNameEl.innerText = currentName;
+            const previewNameEl = document.getElementById('preview-lottery-name');
+            if (previewNameEl) previewNameEl.innerText = currentName;
+            const previewCodeEl = document.getElementById('preview-lottery-code');
+            if (previewCodeEl) previewCodeEl.innerText = currentCode;
+            const detectedBadgeEl = document.getElementById('detected-code-badge');
+            if (detectedBadgeEl) detectedBadgeEl.innerText = currentCode;
+
+            // Gerar novo QR Code em SVG transparente
+            generateQrSvg();
+
+            // Atualizar links da tabela
+            renderTableGrid();
+
+            if (showToastNotification) {
+                showToast("Dados salvos com sucesso!");
+            }
+        }
+
+        // --- 10. GERAÇÃO DE QR CODE EM SVG TOTALMENTE TRANSPARENTE (PARA CORELDRAW) ---
+        function generateQrSvg() {
+            try {
+                const qr = qrcode(0, 'M');
+                qr.addData(currentLink);
+                qr.make();
+
+                const moduleCount = qr.getModuleCount();
+                const cellSize = 8;
+                const margin = 16;
+                const size = moduleCount * cellSize + margin * 2;
+
+                const rects = [];
+                for (let r = 0; r < moduleCount; r++) {
+                    for (let c = 0; c < moduleCount; c++) {
+                        if (qr.isDark(r, c)) {
+                            const x = c * cellSize + margin;
+                            const y = r * cellSize + margin;
+                            rects.push(`<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="${currentQRColor}"/>`);
+                        }
+                    }
+                }
+
+                // SVG com fundo 100% transparente para CorelDRAW
+                generatedSvgString = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+  <!-- Fundo transparente sem rect de preenchimento, vetor em Preto CMYK 100, 100, 100, 100% (#000000) para CorelDRAW -->
+  <g id="qrcode-bolao-caixa-${currentCode}">
+    ${rects.join('\n    ')}
+  </g>
+</svg>`;
+
+                const previewContainer = document.getElementById('qr-code-svg-render');
+                previewContainer.innerHTML = generatedSvgString;
+                
+                const svgElement = previewContainer.querySelector('svg');
+                if (svgElement) {
+                    svgElement.setAttribute('width', '190');
+                    svgElement.setAttribute('height', '190');
+                    svgElement.style.maxWidth = '100%';
+                    svgElement.style.height = 'auto';
+                }
+
+            } catch (err) {
+                console.error("Erro ao gerar QR Code:", err);
+            }
+        }
+
+        // --- 11. DOWNLOAD E EXPORTAÇÃO DE VETOR SVG PARA CORELDRAW ---
+        function downloadQrCodeSvg() {
+            if (!generatedSvgString) generateQrSvg();
+            const blob = new Blob([generatedSvgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `qrcode_bolao_loterica_${currentCode}_transparente.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`QR Code SVG baixado! Pronto para importar no CorelDRAW.`);
+        }
+
+        function downloadCompletePlaqueSvg() {
+            if (!generatedSvgString) generateQrSvg();
+            
+            const plaqueSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 850" width="600" height="850">
+  <defs>
+    <style>
+      .title { font-family: 'Arial', sans-serif; font-size: 32px; font-weight: bold; fill: #ffffff; text-anchor: middle; }
+      .subtitle { font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; fill: #F26522; text-anchor: middle; }
+      .tag { font-family: 'Arial', sans-serif; font-size: 16px; font-weight: bold; fill: #ffffff; text-anchor: middle; }
+      .inst { font-family: 'Arial', sans-serif; font-size: 16px; font-weight: bold; fill: #f26522; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Fundo da Placa de Acrílico Caixa -->
+  <rect x="10" y="10" width="580" height="830" rx="36" ry="36" fill="#003366" stroke="#F26522" stroke-width="8"/>
+
+  <!-- Trevo Caixa Oficial em SVG ou Imagem Enviada -->
+  <g transform="translate(250, 60)">
+    <rect x="-10" y="-10" width="120" height="120" rx="20" ry="20" fill="#ffffff"/>
+    ${customLogoData 
+      ? `<image href="${customLogoData}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid meet"/>`
+      : `<g transform="translate(0, 0)">
+          <path d="M49 49 C38 38 18 36 18 24 C18 12 36 12 44 26 C47 31 48 40 49 49 Z" fill="#003366"/>
+          <path d="M51 49 C62 38 82 36 82 24 C82 12 64 12 56 26 C53 31 52 40 51 49 Z" fill="#F26522"/>
+          <path d="M49 51 C38 62 18 64 18 76 C18 88 36 88 44 74 C47 69 48 60 49 51 Z" fill="#F26522"/>
+          <path d="M51 51 C62 62 82 64 82 76 C82 88 64 88 56 74 C53 69 52 60 51 51 Z" fill="#003366"/>
+          <circle cx="50" cy="50" r="3.5" fill="#ffffff"/>
+        </g>`
+    }
+  </g>
+
+  <!-- Textos da Lotérica -->
+  <text x="300" y="230" class="tag">BOLÃO OFICIAL DA CAIXA</text>
+  <text x="300" y="275" class="title">${currentName}</text>
+  <text x="300" y="315" class="subtitle">CÓDIGO LOTÉRICA: ${currentCode}</text>
+
+  <!-- Área Branca do QR Code -->
+  <rect x="150" y="350" width="300" height="300" rx="24" ry="24" fill="#ffffff" stroke="#e2e8f0" stroke-width="4"/>
+
+  <!-- Inclusão do QR Code Vetorial -->
+  <g transform="translate(160, 360)">
+    ${generatedSvgString.replace(/<\?xml.*?\?>/g, '').replace(/<svg[^>]*>/, '').replace(/<\/svg>/, '')}
+  </g>
+
+  <!-- Instrução Inferior -->
+  <text x="300" y="700" class="inst">APONTE A CÂMERA DO CELULAR PARA APOSTAR</text>
+  <text x="300" y="735" class="tag" font-size="14">Segurança e garantia das Loterias Caixa</text>
+</svg>`;
+
+            const blob = new Blob([plaqueSvg], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `plaquinha_completa_loterica_${currentCode}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`Plaquinha completa SVG baixada para CorelDRAW!`);
+        }
+
+        // --- 11.1 CRIADOR DE QR CODE EM SVG PERSONALIZADO (USO PRÓPRIO / 5 OPÇÕES) ---
+        let customGeneratedSvgString = "";
+        let customTargetUrl = "";
+
+        function handleCustomQrTypeChange() {
+            const typeSelect = document.getElementById('custom-qr-type');
+            const input = document.getElementById('custom-qr-input');
+            const label = document.getElementById('custom-qr-input-label');
+            const hint = document.getElementById('custom-qr-hint');
+            const selectIcon = document.getElementById('custom-qr-select-icon');
+            const inputIcon = document.getElementById('custom-qr-input-icon');
+
+            if (!typeSelect || !input) return;
+            const type = typeSelect.value;
+
+            switch (type) {
+                case 'whatsapp':
+                    if (label) label.innerText = 'Número do WhatsApp:';
+                    input.placeholder = 'wa.me/5511999998888';
+                    input.value = 'wa.me/55';
+                    if (hint) hint.innerHTML = 'Auto preenchido com <strong>wa.me/55</strong>. Apenas complete com o DDD e o número do celular.';
+                    if (selectIcon) selectIcon.innerHTML = '<i class="fa-brands fa-whatsapp text-emerald-600"></i>';
+                    if (inputIcon) inputIcon.innerHTML = '<i class="fa-brands fa-whatsapp text-emerald-600"></i>';
+                    break;
+
+                case 'instagram':
+                    if (label) label.innerText = 'Nome de Usuário do Instagram:';
+                    input.placeholder = 'instagram.com/sualoterica';
+                    input.value = 'instagram.com/';
+                    if (hint) hint.innerHTML = 'Auto preenchido com <strong>instagram.com/</strong>. Apenas complete com o seu nome de usuário.';
+                    if (selectIcon) selectIcon.innerHTML = '<i class="fa-brands fa-instagram text-rose-600"></i>';
+                    if (inputIcon) inputIcon.innerHTML = '<i class="fa-brands fa-instagram text-rose-600"></i>';
+                    break;
+
+                case 'facebook':
+                    if (label) label.innerText = 'Nome de Usuário ou Página do Facebook:';
+                    input.placeholder = 'facebook.com/sualoterica';
+                    input.value = 'facebook.com/';
+                    if (hint) hint.innerHTML = 'Auto preenchido com <strong>facebook.com/</strong>. Apenas complete com o nome da página ou perfil.';
+                    if (selectIcon) selectIcon.innerHTML = '<i class="fa-brands fa-facebook text-blue-600"></i>';
+                    if (inputIcon) inputIcon.innerHTML = '<i class="fa-brands fa-facebook text-blue-600"></i>';
+                    break;
+
+                case 'mapa':
+                    if (label) label.innerText = 'Endereço para Geolocalização no Mapa:';
+                    input.placeholder = 'Ex: Av. Paulista, 1578, Bela Vista, São Paulo - SP';
+                    input.value = '';
+                    if (hint) hint.innerHTML = 'Digite o endereço completo. O QR Code abrirá diretamente a localização no GPS/Google Maps ao ser lido.';
+                    if (selectIcon) selectIcon.innerHTML = '<i class="fa-solid fa-map-location-dot text-caixa-orange"></i>';
+                    if (inputIcon) inputIcon.innerHTML = '<i class="fa-solid fa-map-pin text-caixa-orange"></i>';
+                    break;
+
+                case 'link':
+                default:
+                    if (label) label.innerText = 'Link ou URL desejada:';
+                    input.placeholder = 'https://seusite.com.br';
+                    input.value = '';
+                    if (hint) hint.innerHTML = 'Caixa livre: digite ou cole qualquer link para gerar o QR Code.';
+                    if (selectIcon) selectIcon.innerHTML = '<i class="fa-solid fa-link text-caixa-blue"></i>';
+                    if (inputIcon) inputIcon.innerHTML = '<i class="fa-solid fa-globe text-slate-400"></i>';
+                    break;
+            }
+
+            // Colocar foco no final do input
+            input.focus();
+            const len = input.value.length;
+            input.setSelectionRange(len, len);
+        }
+
+        function generateCustomQrCode(showToastNotice = true) {
+            const typeSelect = document.getElementById('custom-qr-type');
+            const input = document.getElementById('custom-qr-input');
+            const destText = document.getElementById('custom-qr-dest-text');
+            const previewContainer = document.getElementById('custom-qr-svg-render');
+
+            if (!typeSelect || !input || !previewContainer) return;
+
+            const type = typeSelect.value;
+            let raw = input.value.trim();
+
+            let finalUrl = "";
+
+            if (type === 'whatsapp') {
+                if (!raw || raw === 'wa.me/55') {
+                    raw = 'wa.me/5511999998888';
+                    input.value = raw;
+                }
+                // Remover prefixos repetidos se houver
+                const clean = raw.replace(/^https?:\/\//i, '').replace(/^wa\.me\//i, '');
+                // Manter apenas dígitos e garantir DDI 55
+                let digits = clean.replace(/\D/g, '');
+                if (!digits.startsWith('55')) {
+                    digits = '55' + digits;
+                }
+                finalUrl = `https://wa.me/${digits}`;
+            } else if (type === 'instagram') {
+                if (!raw || raw === 'instagram.com/') {
+                    raw = 'instagram.com/promoloto';
+                    input.value = raw;
+                }
+                const clean = raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/^instagram\.com\//i, '').replace(/^@/, '');
+                finalUrl = `https://instagram.com/${clean}`;
+            } else if (type === 'facebook') {
+                if (!raw || raw === 'facebook.com/') {
+                    raw = 'facebook.com/promoloto';
+                    input.value = raw;
+                }
+                const clean = raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/^facebook\.com\//i, '');
+                finalUrl = `https://facebook.com/${clean}`;
+            } else if (type === 'mapa') {
+                if (!raw) {
+                    raw = 'Brasília - DF';
+                    input.value = raw;
+                }
+                finalUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(raw)}`;
+            } else {
+                // Link livre
+                if (!raw) {
+                    raw = 'https://www.caixa.gov.br';
+                    input.value = raw;
+                }
+                if (!/^https?:\/\//i.test(raw)) {
+                    finalUrl = `https://${raw}`;
+                } else {
+                    finalUrl = raw;
+                }
+            }
+
+            customTargetUrl = finalUrl;
+            if (destText) {
+                destText.innerText = finalUrl;
+                destText.title = finalUrl;
+            }
+
+            try {
+                const qr = qrcode(0, 'M');
+                qr.addData(finalUrl);
+                qr.make();
+
+                const moduleCount = qr.getModuleCount();
+                const cellSize = 8;
+                const margin = 16;
+                const size = moduleCount * cellSize + margin * 2;
+
+                const rects = [];
+                for (let r = 0; r < moduleCount; r++) {
+                    for (let c = 0; c < moduleCount; c++) {
+                        if (qr.isDark(r, c)) {
+                            const x = c * cellSize + margin;
+                            const y = r * cellSize + margin;
+                            rects.push(`<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="#000000"/>`);
+                        }
+                    }
+                }
+
+                // SVG com fundo 100% vazado e vetor preto CMYK 100% (#000000)
+                customGeneratedSvgString = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+  <!-- Fundo transparente sem rect de preenchimento, vetor em Preto CMYK 100, 100, 100, 100% (#000000) para CorelDRAW -->
+  <g id="qrcode-personalizado-${type}">
+    ${rects.join('\n    ')}
+  </g>
+</svg>`;
+
+                previewContainer.innerHTML = customGeneratedSvgString;
+                const svgElement = previewContainer.querySelector('svg');
+                if (svgElement) {
+                    svgElement.setAttribute('width', '190');
+                    svgElement.setAttribute('height', '190');
+                    svgElement.style.maxWidth = '100%';
+                    svgElement.style.height = 'auto';
+                }
+
+                if (showToastNotice) {
+                    showToast("QR Code personalizado gerado com sucesso!");
+                }
+            } catch (err) {
+                console.error("Erro ao gerar QR Code personalizado:", err);
+                showToast("Erro ao gerar QR Code. Verifique o link ou texto digitado.");
+            }
+        }
+
+        function downloadCustomQrCodeSvg() {
+            if (!customGeneratedSvgString) {
+                generateCustomQrCode(false);
+            }
+            const typeSelect = document.getElementById('custom-qr-type');
+            const type = typeSelect ? typeSelect.value : 'personalizado';
+
+            const blob = new Blob([customGeneratedSvgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `qrcode_${type}_transparente_cmyk.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`QR Code SVG (${type.toUpperCase()}) baixado! Pronto para importar no CorelDRAW.`);
+        }
+
+        // --- 12. ACESSIBILIDADE PARA IDOSOS ---
+        function setFontScale(scale) {
+            document.documentElement.style.setProperty('--font-scale', `${scale}rem`);
+            [1, 1.15, 1.3].forEach((s, idx) => {
+                const btn = document.getElementById(`font-scale-${idx + 1}`);
+                if (Math.abs(s - scale) < 0.05) {
+                    btn.className = "px-2.5 py-0.5 text-xs font-bold rounded-md bg-caixa-orange text-white";
+                } else {
+                    btn.className = "px-2.5 py-0.5 text-xs font-bold rounded-md text-slate-300 hover:text-white";
+                }
+            });
+            showToast(`Tamanho da letra ajustado.`);
+        }
+
+        function highlightCurrentDayOfWeek() {
+            const daysOfWeek = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+            const todayIndex = new Date().getDay();
+            const todayName = daysOfWeek[todayIndex];
+
+            const idMap = {
+                "Segunda": "day-card-segunda",
+                "Terça": "day-card-terca",
+                "Quarta": "day-card-quarta",
+                "Quinta": "day-card-quinta",
+                "Sexta": "day-card-sexta",
+                "Sábado": "day-card-sabado"
+            };
+
+            const cardId = idMap[todayName];
+            if (cardId) {
+                const card = document.getElementById(cardId);
+                if (card) {
+                    card.classList.remove('bg-blue-900/70', 'border-blue-700/80');
+                    card.classList.add('bg-blue-800', 'border-4', 'border-amber-400', 'ring-4', 'ring-amber-300/40');
+                    const badge = card.querySelector('.is-today-badge');
+                    if (badge) badge.classList.remove('hidden');
+                }
+            }
+        }
+
+        function speakTodayGames() {
+            if (!('speechSynthesis' in window)) {
+                showToast("Recurso de voz não suportado neste navegador.");
+                return;
+            }
+
+            const daysOfWeek = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+            const todayIndex = new Date().getDay();
+            const todayName = daysOfWeek[todayIndex];
+
+            let text = "";
+            if (todayName === "Domingo") {
+                text = "Hoje é domingo. Não há sorteios regulares das Loterias Caixa hoje. Os sorteios recomeçam na segunda-feira com Lotofácil, Quina, Dupla Sena, Lotomania, Super Sete e Loteca.";
+            } else {
+                const games = SCHEDULE_DATA[todayName] || [];
+                text = `Atenção apostador da ${currentName}. Hoje é ${todayName}. Os jogos sorteados hoje são: ${games.join(', ')}. Os sorteios acontecem às 20 horas. Boa sorte!`;
+            }
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 0.95;
+            window.speechSynthesis.speak(utterance);
+            showToast("Lendo jogos de hoje em voz alta...");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

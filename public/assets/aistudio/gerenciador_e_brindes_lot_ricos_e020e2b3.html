@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Bolões e Brindes Caixa</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1e293b;
+        }
+        /* Cores oficiais Caixa */
+        .bg-caixa-blue { background-color: #003366; }
+        .text-caixa-blue { color: #003366; }
+        .border-caixa-blue { border-color: #003366; }
+        .bg-caixa-orange { background-color: #F26522; }
+        .text-caixa-orange { color: #F26522; }
+        .border-caixa-orange { border-color: #F26522; }
+        
+        /* Efeito de transição suave */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- CABEÇALHO PRINCIPAL -->
+    <header class="bg-caixa-blue text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <!-- Logotipo Bolão Caixa Estilizado -->
+                <div class="bg-white p-2 rounded-2xl shadow-md flex items-center justify-center">
+                    <svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M30 35C30 25 40 20 50 20C60 20 70 25 70 35C70 45 60 50 50 50C40 50 30 45 30 35Z" fill="#003366"/>
+                        <path d="M50 50C50 60 40 65 30 65C20 65 15 55 15 45C15 35 25 30 35 30C42 30 48 35 50 50Z" fill="#F26522"/>
+                        <path d="M50 50C50 60 60 65 70 65C80 65 85 55 85 45C85 35 75 30 65 30C58 30 52 35 50 50Z" fill="#003366"/>
+                        <path d="M50 65C50 75 40 80 30 80C20 80 15 70 15 60C15 50 25 45 35 45C42 45 48 50 50 65Z" fill="#F26522"/>
+                        <path d="M50 65C50 75 60 80 70 80C80 80 85 70 85 60C85 50 75 45 65 45C58 45 52 50 50 65Z" fill="#003366"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-wide">BOLÃO CAIXA</h1>
+                    <p class="text-sm md:text-base text-orange-300 font-semibold" id="header-lottery-name">Lotérica: Pé Quente (Cód: 4832)</p>
+                </div>
+            </div>
+
+            <!-- NAVEGAÇÃO DE ABAS (GRANDES PARA FÁCIL CLIQUE) -->
+            <nav class="flex gap-3 bg-blue-950 p-2 rounded-2xl w-full md:w-auto justify-center">
+                <button onclick="switchTab('consultation')" id="btn-consultation" class="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-lg bg-caixa-orange text-white shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-calendar-days"></i> Consulta & Sorteios
+                </button>
+                <button onclick="switchTab('admin')" id="btn-admin" class="flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-lg bg-blue-800 hover:bg-blue-700 text-white shadow transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-gear"></i> Área Administrativa
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- CORPO DA APLICAÇÃO -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+
+        <!-- ================= ABA 1: CONSULTA (DIAS E JOGOS) ================= -->
+        <div id="tab-consultation" class="tab-content active">
+            
+            <!-- Banner de Acesso Rápido / Destaque para Idosos -->
+            <div class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white p-6 md:p-8 rounded-3xl shadow-xl mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <span class="bg-caixa-orange text-white text-sm font-bold uppercase px-3 py-1 rounded-full">Painel do Apostador</span>
+                    <h2 class="text-3xl md:text-4xl font-black mt-2">Faça seu Bolão com Segurança!</h2>
+                    <p class="text-lg text-blue-200 mt-1">Selecione um jogo ou o dia da semana para ver os sorteios e acessar os bolões oficiais.</p>
+                </div>
+                <div class="bg-white/10 p-4 rounded-2xl border border-white/20 text-center w-full md:w-auto">
+                    <p class="text-sm text-blue-200">Sua Lotérica Selecionada:</p>
+                    <p class="text-xl font-extrabold text-orange-300" id="display-lottery-title">Lotérica Pé Quente (4832)</p>
+                    <a id="direct-link-btn" href="https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/4832" target="_blank" class="mt-3 inline-block bg-caixa-orange hover:bg-orange-600 text-white font-black text-lg py-3 px-6 rounded-xl shadow-lg transition transform hover:scale-105 w-full">
+                        <i class="fa-solid fa-external-link-alt mr-2"></i> Abrir Site da Caixa
+                    </a>
+                </div>
+            </div>
+
+            <!-- BOTÕES DE FILTRO PRINCIPAIS -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button onclick="setFilterMode('table')" id="filter-btn-table" class="px-8 py-4 rounded-2xl font-black text-xl shadow-lg transition-all flex items-center gap-3 bg-caixa-blue text-white ring-4 ring-blue-300">
+                    <i class="fa-solid fa-table-cells"></i> Tabela Completa (Dias e Jogos)
+                </button>
+                <button onclick="setFilterMode('games')" id="filter-btn-games" class="px-8 py-4 rounded-2xl font-black text-xl shadow-lg transition-all flex items-center gap-3 bg-white text-caixa-blue hover:bg-gray-100 border-2 border-caixa-blue">
+                    <i class="fa-solid fa-dice"></i> Filtrar por JOGOS
+                </button>
+                <button onclick="setFilterMode('days')" id="filter-btn-days" class="px-8 py-4 rounded-2xl font-black text-xl shadow-lg transition-all flex items-center gap-3 bg-white text-caixa-blue hover:bg-gray-100 border-2 border-caixa-blue">
+                    <i class="fa-solid fa-calendar-week"></i> Filtrar por DIAS
+                </button>
+            </div>
+
+            <!-- CONTEÚDO DO FILTRO: TABELA COMPLETA (Inspirada na imagem de referência) -->
+            <div id="view-table" class="view-mode">
+                <div class="bg-caixa-blue rounded-3xl p-4 md:p-8 shadow-2xl overflow-x-auto">
+                    <div class="text-center mb-6">
+                        <h3 class="text-3xl md:text-4xl font-black text-orange-400 tracking-wider">DIA DOS JOGOS</h3>
+                        <p class="text-blue-200 text-lg">Clique em qualquer jogo para acessar o bolão correspondente</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 min-w-[700px]">
+                        <!-- SEGUNDA -->
+                        <div class="bg-blue-900/80 p-3 rounded-2xl border border-blue-700 flex flex-col gap-3">
+                            <div class="bg-caixa-orange text-white text-center font-black py-2 rounded-xl text-lg shadow">SEG</div>
+                            <div class="flex flex-col gap-2" id="col-segunda"></div>
+                        </div>
+                        <!-- TERÇA -->
+                        <div class="bg-blue-900/80 p-3 rounded-2xl border border-blue-700 flex flex-col gap-3">
+                            <div class="bg-caixa-orange text-white text-center font-black py-2 rounded-xl text-lg shadow">TER</div>
+                            <div class="flex flex-col gap-2" id="col-terca"></div>
+                        </div>
+                        <!-- QUARTA -->
+                        <div class="bg-blue-900/80 p-3 rounded-2xl border border-blue-700 flex flex-col gap-3">
+                            <div class="bg-caixa-orange text-white text-center font-black py-2 rounded-xl text-lg shadow">QUA</div>
+                            <div class="flex flex-col gap-2" id="col-quarta"></div>
+                        </div>
+                        <!-- QUINTA -->
+                        <div class="bg-blue-900/80 p-3 rounded-2xl border border-blue-700 flex flex-col gap-3">
+                            <div class="bg-caixa-orange text-white text-center font-black py-2 rounded-xl text-lg shadow">QUI</div>
+                            <div class="flex flex-col gap-2" id="col-quinta"></div>
+                        </div>
+                        <!-- SEXTA -->
+                        <div class="bg-blue-900/80 p-3 rounded-2xl border border-blue-700 flex flex-col gap-3">
+                            <div class="bg-caixa-orange text-white text-center font-black py-2 rounded-xl text-lg shadow">SEX</div>
+                            <div class="flex flex-col gap-2" id="col-sexta"></div>
+                        </div>
+                        <!-- SÁBADO -->
+                        <div class="bg-blue-900/80 p-3 rounded-2xl border border-blue-700 flex flex-col gap-3">
+                            <div class="bg-caixa-orange text-white text-center font-black py-2 rounded-xl text-lg shadow">SÁB</div>
+                            <div class="flex flex-col gap-2" id="col-sabado"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTEÚDO DO FILTRO: JOGOS -->
+            <div id="view-games" class="view-mode hidden">
+                <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl">
+                    <h3 class="text-2xl md:text-3xl font-black text-caixa-blue mb-6 text-center">Selecione o Jogo Desejado</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8" id="games-grid-selection">
+                        <!-- Gerado via JS -->
+                    </div>
+
+                    <div id="selected-game-detail" class="bg-blue-50 border-2 border-blue-200 rounded-3xl p-6 hidden">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div>
+                                <span class="bg-blue-200 text-caixa-blue font-bold px-3 py-1 rounded-full text-sm">Jogo Selecionado</span>
+                                <h4 class="text-3xl font-black text-caixa-blue mt-2" id="detail-game-name">Lotofácil</h4>
+                                <p class="text-lg text-gray-700 mt-1">Dias de Sorteio: <span class="font-bold text-caixa-orange" id="detail-game-days">Segunda, Quarta, Sexta</span></p>
+                            </div>
+                            <a id="detail-game-link" href="#" target="_blank" class="bg-caixa-orange hover:bg-orange-600 text-white font-black text-xl py-4 px-8 rounded-2xl shadow-xl transition transform hover:scale-105 flex items-center gap-3">
+                                <i class="fa-solid fa-ticket"></i> Ver Bolão Disponível na Caixa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTEÚDO DO FILTRO: DIAS -->
+            <div id="view-days" class="view-mode hidden">
+                <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl">
+                    <h3 class="text-2xl md:text-3xl font-black text-caixa-blue mb-6 text-center">Selecione o Dia da Semana</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8" id="days-grid-selection">
+                        <!-- Gerado via JS -->
+                    </div>
+
+                    <div id="selected-day-detail" class="bg-blue-50 border-2 border-blue-200 rounded-3xl p-6 hidden">
+                        <h4 class="text-2xl font-black text-caixa-blue mb-4 border-b pb-2">Jogos sorteados na <span id="detail-day-name" class="text-caixa-orange">Segunda-feira</span>:</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="detail-day-games-list">
+                            <!-- Gerado via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= ABA 2: ADMINISTRATIVA (QR CODE E BRINDES) ================= -->
+        <div id="tab-admin" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- PAINEL DE CONFIGURAÇÃO -->
+                <div class="lg:col-span-6 bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-gray-100">
+                    <h2 class="text-2xl md:text-3xl font-black text-caixa-blue mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-sliders text-caixa-orange"></i> Painel Administrativo
+                    </h2>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-lg font-bold text-gray-700 mb-2">Código da Lotérica ou Link da Caixa:</label>
+                            <input type="text" id="input-lottery-link" value="https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/4832" 
+                                class="w-full p-4 rounded-2xl border-2 border-gray-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-lg font-medium"
+                                placeholder="Ex: 4832 ou link completo">
+                            <p class="text-sm text-gray-500 mt-1">Dica: Cole o link completo da Caixa ou digite apenas os últimos 4 dígitos.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-bold text-gray-700 mb-2">Nome da Lotérica:</label>
+                            <input type="text" id="input-lottery-name" value="Lotérica Pé Quente" 
+                                class="w-full p-4 rounded-2xl border-2 border-gray-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-lg font-medium"
+                                placeholder="Ex: Lotérica Sorte Grande">
+                        </div>
+
+                        <div>
+                            <label class="block text-lg font-bold text-gray-700 mb-2">Cor do QR Code (para CorelDRAW):</label>
+                            <div class="flex items-center gap-4">
+                                <input type="color" id="input-qr-color" value="#003366" class="w-16 h-16 rounded-xl cursor-pointer border-2 border-gray-300 p-1 bg-white">
+                                <div class="flex gap-2">
+                                    <button onclick="setQRColor('#003366')" class="px-4 py-2 bg-caixa-blue text-white rounded-xl font-bold text-sm">Azul Caixa</button>
+                                    <button onclick="setQRColor('#F26522')" class="px-4 py-2 bg-caixa-orange text-white rounded-xl font-bold text-sm">Laranja</button>
+                                    <button onclick="setQRColor('#000000')" class="px-4 py-2 bg-black text-white rounded-xl font-bold text-sm">Preto</button>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">O QR Code gerado possui fundo totalmente transparente para personalização perfeita no CorelDRAW.</p>
+                        </div>
+
+                        <button onclick="updateAdminData()" class="w-full bg-caixa-blue hover:bg-blue-900 text-white font-black text-xl py-4 rounded-2xl shadow-xl transition transform hover:scale-[1.02] flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-floppy-disk"></i> Salvar e Atualizar Sistema
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PREVIEW DA PLACA / BRINDE & QR CODE -->
+                <div class="lg:col-span-6 space-y-6">
+                    
+                    <!-- PREVIEW DA IDENTIDADE VISUAL COM TREVO DA CAIXA -->
+                    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border border-gray-100 text-center">
+                        <h3 class="text-xl font-bold text-gray-700 mb-4">Preview do Brinde / Placa de Balcão</h3>
+                        
+                        <div id="plaque-preview" class="bg-gradient-to-b from-blue-900 to-blue-950 text-white p-6 rounded-3xl shadow-2xl border-4 border-orange-400 relative overflow-hidden flex flex-col items-center">
+                            <!-- Novo Trevo da Caixa (Moderno 4 folhas azul e laranja) -->
+                            <div class="mb-3 bg-white p-3 rounded-2xl shadow-lg">
+                                <svg width="70" height="70" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M30 35C30 25 40 20 50 20C60 20 70 25 70 35C70 45 60 50 50 50C40 50 30 45 30 35Z" fill="#003366"/>
+                                    <path d="M50 50C50 60 40 65 30 65C20 65 15 55 15 45C15 35 25 30 35 30C42 30 48 35 50 50Z" fill="#F26522"/>
+                                    <path d="M50 50C50 60 60 65 70 65C80 65 85 55 85 45C85 35 75 30 65 30C58 30 52 35 50 50Z" fill="#003366"/>
+                                    <path d="M50 65C50 75 40 80 30 80C20 80 15 70 15 60C15 50 25 45 35 45C42 45 48 50 50 65Z" fill="#F26522"/>
+                                    <path d="M50 65C50 75 60 80 70 80C80 80 85 70 85 60C85 50 75 45 65 45C58 45 52 50 50 65Z" fill="#003366"/>
+                                </svg>
+                            </div>
+                            
+                            <h4 class="text-2xl md:text-3xl font-black tracking-wide" id="preview-lottery-name">Lotérica Pé Quente</h4>
+                            <p class="text-orange-400 font-bold text-lg mb-4">Código: <span id="preview-lottery-code">4832</span></p>
+
+                            <!-- QR CODE CONTAINER -->
+                            <div class="bg-white p-4 rounded-2xl shadow-inner inline-block mb-3" id="qr-code-preview-container">
+                                <!-- Gerado via JS -->
+                            </div>
+                            <p class="text-xs text-blue-200">Aponte a câmera do celular para testar o acesso ao bolão</p>
+                        </div>
+
+                        <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+                            <button onclick="downloadSVG()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-black text-lg py-4 px-6 rounded-2xl shadow-xl transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-download"></i> Baixar QR Code SVG (CorelDRAW)
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-blue-950 text-white py-6 mt-auto text-center border-t border-blue-900">
+        <p class="text-base text-blue-300">Sistema de Gestão de Bolões e Brindes Lotéricos para Idosos • Desenvolvido com Alta Acessibilidade</p>
+    </footer>
+
+    <!-- SCRIPT DA APLICAÇÃO -->
+    <script>
+        // Dados de Sorteios inspirados na imagem de referência oficial
+        const scheduleData = {
+            "Segunda": ["Lotofácil", "Quina", "Dupla Sena", "Lotomania", "Super Sete"],
+            "Terça": ["Mega-Sena", "Lotofácil", "Quina", "Timemania", "Dia de Sorte"],
+            "Quarta": ["Lotofácil", "Quina", "+Milionária", "Dupla Sena", "Lotomania", "Super Sete", "Federal"],
+            "Quinta": ["Mega-Sena", "Lotofácil", "Quina", "Timemania", "Dia de Sorte"],
+            "Sexta": ["Lotofácil", "Quina", "Dupla Sena", "Lotomania", "Super Sete"],
+            "Sábado": ["Mega-Sena", "Lotofácil", "Quina", "+Milionária", "Timemania", "Dia de Sorte", "Federal"]
+        };
+
+        const allGames = [
+            "Lotofácil", "Quina", "Dupla Sena", "Lotomania", "Super Sete", 
+            "Mega-Sena", "Timemania", "Dia de Sorte", "+Milionária", "Federal"
+        ];
+
+        // Mapeamento de dias por jogo para a busca reversa
+        const gameDaysMap = {};
+        allGames.forEach(game => {
+            gameDaysMap[game] = [];
+            for (const [day, games] of Object.entries(scheduleData)) {
+                if (games.includes(game)) {
+                    gameDaysMap[game].push(day);
+                }
+            }
+        });
+
+        // Estado atual
+        let currentLink = "https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/4832";
+        let currentCode = "4832";
+        let currentName = "Lotérica Pé Quente";
+        let currentQRColor = "#003366";
+        let generatedSvgString = "";
+
+        // Inicialização
+        window.onload = function() {
+            renderTableGrid();
+            renderGamesSelection();
+            renderDaysSelection();
+            updateAdminData();
+        };
+
+        // Troca de Abas
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            const btnConsultation = document.getElementById('btn-consultation');
+            const btnAdmin = document.getElementById('btn-admin');
+
+            if (tabId === 'consultation') {
+                btnConsultation.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-lg bg-caixa-orange text-white shadow-lg transition-all flex items-center justify-center gap-2";
+                btnAdmin.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-lg bg-blue-800 hover:bg-blue-700 text-white shadow transition-all flex items-center justify-center gap-2";
+            } else {
+                btnAdmin.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-lg bg-caixa-orange text-white shadow-lg transition-all flex items-center justify-center gap-2";
+                btnConsultation.className = "flex-1 md:flex-none px-6 py-3 rounded-xl font-bold text-lg bg-blue-800 hover:bg-blue-700 text-white shadow transition-all flex items-center justify-center gap-2";
+            }
+        }
+
+        // Modos de Filtro na Consulta
+        function setFilterMode(mode) {
+            document.querySelectorAll('.view-mode').forEach(el => el.classList.add('hidden'));
+            document.getElementById('view-' + mode).classList.remove('hidden');
+
+            const btnTable = document.getElementById('filter-btn-table');
+            const btnGames = document.getElementById('filter-btn-games');
+            const btnDays = document.getElementById('filter-btn-days');
+
+            [btnTable, btnGames, btnDays].forEach(btn => {
+                btn.className = "px-8 py-4 rounded-2xl font-black text-xl shadow-lg transition-all flex items-center gap-3 bg-white text-caixa-blue hover:bg-gray-100 border-2 border-caixa-blue";
+                btn.classList.remove("ring-4", "ring-blue-300", "bg-caixa-blue", "text-white");
+            });
+
+            const activeBtn = document.getElementById('filter-btn-' + mode);
+            activeBtn.className = "px-8 py-4 rounded-2xl font-black text-xl shadow-lg transition-all flex items-center gap-3 bg-caixa-blue text-white ring-4 ring-blue-300";
+        }
+
+        // Renderizar Tabela Completa (Segunda a Sábado)
+        function renderTableGrid() {
+            const dayKeys = [
+                { key: "Segunda", id: "col-segunda" },
+                { key: "Terça", id: "col-terca" },
+                { key: "Quarta", id: "col-quarta" },
+                { key: "Quinta", id: "col-quinta" },
+                { key: "Sexta", id: "col-sexta" },
+                { key: "Sábado", id: "col-sabado" }
+            ];
+
+            dayKeys.forEach(d => {
+                const container = document.getElementById(d.id);
+                container.innerHTML = "";
+                scheduleData[d.key].forEach(game => {
+                    const btn = document.createElement('a');
+                    btn.href = currentLink;
+                    btn.target = "_blank";
+                    btn.className = "bg-white hover:bg-orange-50 text-caixa-blue font-extrabold text-sm md:text-base py-3 px-2 rounded-xl text-center shadow transition transform hover:scale-105 border border-blue-200 flex flex-col items-center justify-center gap-1";
+                    btn.innerHTML = `<span>${game}</span><span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-ticket"></i> Bolão</span>`;
+                    container.appendChild(btn);
+                });
+            });
+        }
+
+        // Renderizar Seleção por Jogos
+        function renderGamesSelection() {
+            const container = document.getElementById('games-grid-selection');
+            container.innerHTML = "";
+            allGames.forEach(game => {
+                const btn = document.createElement('button');
+                btn.className = "bg-blue-50 hover:bg-caixa-blue hover:text-white text-caixa-blue border-2 border-caixa-blue font-black text-lg p-4 rounded-2xl shadow transition transform hover:scale-105 text-center";
+                btn.innerHTML = `<i class="fa-solid fa-dice text-2xl mb-1 text-caixa-orange"></i><br>${game}`;
+                btn.onclick = () => selectGame(game);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectGame(gameName) {
+            document.getElementById('selected-game-detail').classList.remove('hidden');
+            document.getElementById('detail-game-name').innerText = gameName;
+            document.getElementById('detail-game-days').innerText = gameDaysMap[gameName].join(", ");
+            document.getElementById('detail-game-link').href = currentLink;
+        }
+
+        // Renderizar Seleção por Dias
+        function renderDaysSelection() {
+            const container = document.getElementById('days-grid-selection');
+            container.innerHTML = "";
+            const days = Object.keys(scheduleData);
+            days.forEach(day => {
+                const btn = document.createElement('button');
+                btn.className = "bg-blue-50 hover:bg-caixa-blue hover:text-white text-caixa-blue border-2 border-caixa-blue font-black text-lg p-4 rounded-2xl shadow transition transform hover:scale-105 text-center";
+                btn.innerHTML = `<i class="fa-solid fa-calendar-day text-2xl mb-1 text-caixa-orange"></i><br>${day}`;
+                btn.onclick = () => selectDay(day);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectDay(dayName) {
+            document.getElementById('selected-day-detail').classList.remove('hidden');
+            document.getElementById('detail-day-name').innerText = dayName + "-feira";
+            const listContainer = document.getElementById('detail-day-games-list');
+            listContainer.innerHTML = "";
+
+            scheduleData[dayName].forEach(game => {
+                const a = document.createElement('a');
+                a.href = currentLink;
+                a.target = "_blank";
+                a.className = "bg-white hover:bg-orange-50 border-2 border-blue-200 p-4 rounded-2xl shadow font-black text-caixa-blue text-lg flex items-center justify-between transition transform hover:scale-105";
+                a.innerHTML = `<span>${game}</span> <span class="bg-caixa-orange text-white text-xs px-3 py-1.5 rounded-xl font-bold">Comprar Bolão</span>`;
+                listContainer.appendChild(a);
+            });
+        }
+
+        // Atualizar Dados Administrativos
+        function updateAdminData() {
+            const linkInput = document.getElementById('input-lottery-link').value.trim();
+            const nameInput = document.getElementById('input-lottery-name').value.trim();
+
+            if (linkInput) {
+                // Extrair últimos 4 dígitos se for URL ou usar direto
+                const match = linkInput.match(/\/(\d{4})(?:\/)?$/) || linkInput.match(/(\d{4})/);
+                if (match && match[1]) {
+                    currentCode = match[1];
+                    currentLink = `https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/${currentCode}`;
+                } else {
+                    currentLink = linkInput;
+                    currentCode = "4832";
+                }
+            }
+
+            if (nameInput) {
+                currentName = nameInput;
+            }
+
+            // Atualizar UI
+            document.getElementById('header-lottery-name').innerText = `Lotérica: ${currentName} (Cód: ${currentCode})`;
+            document.getElementById('display-lottery-title').innerText = `${currentName} (${currentCode})`;
+            document.getElementById('direct-link-btn').href = currentLink;
+            document.getElementById('preview-lottery-name').innerText = currentName;
+            document.getElementById('preview-lottery-code').innerText = currentCode;
+
+            // Gerar QR Code
+            generateQRCodeSVG();
+            renderTableGrid();
+        }
+
+        function setQRColor(colorHex) {
+            document.getElementById('input-qr-color').value = colorHex;
+            currentQRColor = colorHex;
+            generateQRCodeSVG();
+        }
+
+        // Gerar QR Code em formato SVG com fundo transparente
+        function generateQRCodeSVG() {
+            const color = document.getElementById('input-qr-color').value || currentQRColor;
+            currentQRColor = color;
+
+            try {
+                // Tipo 0 (automático), nível de correção M
+                const qr = qrcode(0, 'M');
+                qr.addData(currentLink);
+                qr.make();
+
+                const moduleCount = qr.getModuleCount();
+                const cellSize = 8;
+                const margin = 16;
+                const size = moduleCount * cellSize + margin * 2;
+
+                let svgPaths = [];
+                for (let r = 0; r < moduleCount; r++) {
+                    for (let c = 0; c < moduleCount; c++) {
+                        if (qr.isDark(r, c)) {
+                            const x = c * cellSize + margin;
+                            const y = r * cellSize + margin;
+                            svgPaths.push(`<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="${color}"/>`);
+                        }
+                    }
+                }
+
+                // Montar SVG com fundo transparente
+                generatedSvgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="100%" height="100%">
+    <rect width="100%" height="100%" fill="none"/>
+    ${svgPaths.join('\n    ')}
+</svg>`;
+
+                // Inserir no preview
+                document.getElementById('qr-code-preview-container').innerHTML = generatedSvgString;
+                // Ajustar tamanho visual no preview
+                const svgElem = document.querySelector('#qr-code-preview-container svg');
+                if (svgElem) {
+                    svgElem.style.width = '180px';
+                    svgElem.style.height = '180px';
+                }
+
+            } catch (e) {
+                console.error("Erro ao gerar QR Code:", e);
+            }
+        }
+
+        // Download do arquivo SVG otimizado para CorelDRAW
+        function downloadSVG() {
+            if (!generatedSvgString) return;
+            const blob = new Blob([generatedSvgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `qrcode_bolao_${currentCode}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Ouvinte para cor dinâmica
+        document.getElementById('input-qr-color').addEventListener('input', (e) => {
+            currentQRColor = e.target.value;
+            generateQRCodeSVG();
+        });
+    </script>
+</body>
+</html>
