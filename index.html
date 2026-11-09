@@ -133,7 +133,7 @@
 
     <!-- 2. CABEÇALHO LIMPO (PURAMENTE VISUAL) -->
     <header class="bg-white text-slate-900 shadow-sm border-b-2 border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 py-3 sm:py-3.5 flex items-center justify-center sm:justify-start gap-3 sm:gap-4">
+        <div class="max-w-7xl xl:max-w-[97vw] 2xl:max-w-[1840px] mx-auto px-4 py-3 sm:py-3.5 xl:py-2 flex items-center justify-center sm:justify-start gap-3 sm:gap-4">
             <!-- Logotipo Trevo Caixa Oficial ou Personalizado (Visual) -->
             <div class="shrink-0 flex items-center justify-center" aria-hidden="true">
                 <div id="header-logo-container" class="w-11 h-11 flex items-center justify-center">
@@ -148,22 +148,22 @@
     </header>
 
     <!-- CORPO PRINCIPAL -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6">
+    <main class="flex-1 max-w-7xl xl:max-w-[97vw] 2xl:max-w-[1840px] w-full mx-auto p-3 sm:p-6 xl:p-2 2xl:p-3">
 
         <!-- ================= ABA PRINCIPAL: CONSULTA DE SORTEIOS E BOLÕES (PARA OS CLIENTES IDOSOS) ================= -->
         <section id="panel-consultation" class="tab-panel active" role="region" aria-label="Consulta de Jogos e Bolões">
 
             <!-- FILTROS PRINCIPAIS: APENAS 2 BOTÕES ("POR JOGO" ou "POR DIA") -->
-            <div class="mb-5 mt-2">
+            <div class="mb-5 mt-2 xl:mb-2 xl:mt-0.5">
                 <div class="grid grid-cols-2 gap-3 sm:gap-4 max-w-xl mx-auto" role="group" aria-label="Modo de Visualização">
                     <button type="button" onclick="setFilterMode('games')" id="filter-btn-games"
-                        class="btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue">
-                        <i class="fa-solid fa-dice text-xl sm:text-2xl text-caixa-orange" aria-hidden="true"></i>
+                        class="btn-large px-4 py-3.5 xl:py-1.5 rounded-2xl xl:rounded-xl font-black text-base sm:text-xl xl:text-base shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue">
+                        <i class="fa-solid fa-dice text-xl sm:text-2xl xl:text-lg text-caixa-orange" aria-hidden="true"></i>
                         <span>POR JOGO</span>
                     </button>
                     <button type="button" onclick="setFilterMode('days')" id="filter-btn-days"
-                        class="btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue">
-                        <i class="fa-solid fa-calendar-week text-xl sm:text-2xl text-orange-400" aria-hidden="true"></i>
+                        class="btn-large px-4 py-3.5 xl:py-1.5 rounded-2xl xl:rounded-xl font-black text-base sm:text-xl xl:text-base shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue">
+                        <i class="fa-solid fa-calendar-week text-xl sm:text-2xl xl:text-lg text-orange-400" aria-hidden="true"></i>
                         <span>POR DIA</span>
                     </button>
                 </div>
@@ -171,14 +171,14 @@
 
             <!-- ================= MODO: POR DIA (SEGUNDA A SÁBADO SEM BARRA DE ROLAGEM LATERAL) ================= -->
             <div id="view-mode-days" class="view-panel">
-                <div class="bg-caixa-blue text-white rounded-3xl p-4 sm:p-6 shadow-2xl border-4 border-blue-900 w-full">
-                    <div class="text-center mb-5">
-                        <h2 class="text-3xl sm:text-4xl font-black text-orange-400 tracking-wide">
+                <div class="bg-caixa-blue text-white rounded-3xl xl:rounded-2xl p-4 sm:p-6 xl:p-2.5 2xl:p-3 shadow-2xl border-4 border-blue-900 w-full">
+                    <div class="text-center mb-5 xl:mb-2">
+                        <h2 class="text-3xl sm:text-4xl xl:text-2xl font-black text-orange-400 tracking-wide">
                             DIA DOS JOGOS
                         </h2>
 
-                        <!-- Atalhos de navegação rápida de dias para facilitar ainda mais para idosos no celular -->
-                        <div class="flex flex-wrap justify-center gap-2 mt-4" aria-label="Pular para dia da semana">
+                        <!-- Atalhos de navegação rápida de dias para celular (oculto no desktop já que todas as colunas são visíveis) -->
+                        <div class="flex flex-wrap justify-center gap-2 mt-4 xl:hidden" aria-label="Pular para dia da semana">
                             <button type="button" onclick="scrollToDay('segunda')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">SEG</button>
                             <button type="button" onclick="scrollToDay('terca')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">TER</button>
                             <button type="button" onclick="scrollToDay('quarta')" class="px-3.5 py-2 bg-blue-900/90 hover:bg-caixa-orange active:bg-orange-600 text-white text-sm font-black rounded-xl border border-blue-600 transition shadow">QUA</button>
@@ -190,68 +190,68 @@
 
                     <!-- Grade 100% responsiva (1 coluna no mobile, sem rolagem horizontal) -->
                     <div class="w-full">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5 w-full">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5 xl:gap-2 2xl:gap-2.5 w-full">
                             
                             <!-- SEGUNDA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-segunda">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-segunda">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">SEGUNDA</span>
-                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-segunda"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-segunda"></div>
                             </div>
 
                             <!-- TERÇA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-terca">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-terca">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">TERÇA</span>
-                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-terca"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-terca"></div>
                             </div>
 
                             <!-- QUARTA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-quarta">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-quarta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">QUARTA</span>
-                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-quarta"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-quarta"></div>
                             </div>
 
                             <!-- QUINTA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-quinta">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-quinta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">QUINTA</span>
-                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-quinta"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-quinta"></div>
                             </div>
 
                             <!-- SEXTA -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-sexta">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-sexta">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">SEXTA</span>
-                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-sexta"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-sexta"></div>
                             </div>
 
                             <!-- SÁBADO -->
-                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 rounded-2xl border-2 border-blue-700/80 flex flex-col gap-3 shadow-md w-full" id="day-card-sabado">
-                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 rounded-xl text-xl shadow-md border-2 border-slate-100 flex flex-col items-center">
+                            <div class="day-card bg-blue-900/70 p-3 sm:p-4 xl:p-1.5 2xl:p-2 rounded-2xl xl:rounded-xl border-2 border-blue-700/80 flex flex-col gap-3 xl:gap-1.5 shadow-md w-full" id="day-card-sabado">
+                                <div class="day-header bg-white text-[#003366] text-center font-black py-3 xl:py-1.5 rounded-xl xl:rounded-lg text-xl xl:text-sm 2xl:text-base shadow-md border-2 border-slate-100 flex flex-col items-center">
                                     <span class="tracking-wider text-[#003366] font-black">SÁBADO</span>
-                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 rounded-full mt-1 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
+                                    <span class="text-xs font-bold text-white bg-[#003366] px-2.5 py-0.5 xl:px-1.5 xl:py-0 rounded-full mt-1 xl:mt-0.5 hidden is-today-badge shadow-sm">Sorteio Hoje!</span>
                                 </div>
-                                <div class="flex flex-col gap-2.5 w-full" id="grid-col-sabado"></div>
+                                <div class="flex flex-col gap-2.5 xl:gap-1.5 w-full" id="grid-col-sabado"></div>
                             </div>
 
                         </div>
                     </div>
 
                     <!-- Rodapé da tabela com horário centralizado -->
-                    <div class="mt-6 pt-4 border-t border-blue-800 text-center">
-                        <p class="font-black text-orange-300 text-base sm:text-lg tracking-wide uppercase">
+                    <div class="mt-6 xl:mt-2 pt-4 xl:pt-1.5 border-t border-blue-800 text-center">
+                        <p class="font-black text-orange-300 text-base sm:text-lg xl:text-xs 2xl:text-sm tracking-wide uppercase">
                             HORÁRIO DOS SORTEIOS: 20h00
                         </p>
                     </div>
@@ -1093,13 +1093,13 @@
             if (mode === 'days') {
                 if (viewDays) viewDays.classList.remove('hidden');
                 if (viewGames) viewGames.classList.add('hidden');
-                if (btnDays) btnDays.className = "btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue";
-                if (btnGames) btnGames.className = "btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue";
+                if (btnDays) btnDays.className = "btn-large px-4 py-3.5 xl:py-1.5 rounded-2xl xl:rounded-xl font-black text-base sm:text-xl xl:text-base shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue";
+                if (btnGames) btnGames.className = "btn-large px-4 py-3.5 xl:py-1.5 rounded-2xl xl:rounded-xl font-black text-base sm:text-xl xl:text-base shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue";
             } else {
                 if (viewGames) viewGames.classList.remove('hidden');
                 if (viewDays) viewDays.classList.add('hidden');
-                if (btnGames) btnGames.className = "btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue";
-                if (btnDays) btnDays.className = "btn-large px-4 py-3.5 rounded-2xl font-black text-base sm:text-xl shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue";
+                if (btnGames) btnGames.className = "btn-large px-4 py-3.5 xl:py-1.5 rounded-2xl xl:rounded-xl font-black text-base sm:text-xl xl:text-base shadow-lg transition-all flex items-center justify-center gap-2 bg-caixa-blue text-white ring-4 ring-blue-300 border-2 border-caixa-blue";
+                if (btnDays) btnDays.className = "btn-large px-4 py-3.5 xl:py-1.5 rounded-2xl xl:rounded-xl font-black text-base sm:text-xl xl:text-base shadow-md transition-all flex items-center justify-center gap-2 bg-white text-caixa-blue hover:bg-blue-50 border-2 border-caixa-blue";
             }
         }
 
@@ -1146,13 +1146,13 @@
                         ? `<img src="${logoSrc}" alt="Logo ${game}" class="w-full h-full object-contain drop-shadow" />`
                         : getGameHeartCloverSvg(game, "w-full h-full drop-shadow-sm");
 
-                    // Botão no modo POR DIA: logo aumentado na extremidade esquerda e fonte grande em destaque
-                    item.className = `touch-card w-full relative ${cfg.textClass} font-black text-2xl sm:text-3xl md:text-3xl lg:text-base xl:text-lg 2xl:text-2xl py-4 sm:py-5 md:py-5.5 px-3 rounded-2xl shadow-md transition transform hover:scale-[1.02] active:scale-95 border-2 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-amber-300 cursor-pointer overflow-hidden text-center`;
+                    // Botão no modo POR DIA: no mobile grande, no desktop compacto para caber sem rolar
+                    item.className = `touch-card w-full relative ${cfg.textClass} font-black text-2xl sm:text-3xl md:text-3xl xl:text-xs 2xl:text-sm py-4 sm:py-5 md:py-5.5 xl:py-1.5 2xl:py-2 px-3 xl:px-1.5 rounded-2xl xl:rounded-lg shadow-md transition transform hover:scale-[1.02] active:scale-95 border-2 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-amber-300 cursor-pointer overflow-hidden text-center`;
                     item.innerHTML = `
-                        <div class="absolute left-3.5 sm:left-4.5 md:left-5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 flex items-center justify-center shrink-0 pointer-events-none">
+                        <div class="absolute left-3.5 sm:left-4.5 md:left-5 xl:left-2 2xl:left-2.5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 md:w-14 md:h-14 xl:w-6 xl:h-6 2xl:w-6.5 2xl:h-6.5 flex items-center justify-center shrink-0 pointer-events-none">
                             ${logoHtml}
                         </div>
-                        <span class="tracking-wider uppercase whitespace-nowrap text-center font-black pl-12 sm:pl-16 pr-2 sm:pr-4" style="${cfg.textStyle}">${game}</span>
+                        <span class="tracking-wider uppercase whitespace-nowrap text-center font-black pl-12 sm:pl-16 xl:pl-7 2xl:pl-8 pr-2 xl:pr-1" style="${cfg.textStyle}">${game}</span>
                     `;
 
                     item.onclick = () => {
