@@ -704,19 +704,37 @@
         }
         testConnection();
 
-        // Salvar logos na nuvem Firestore
+        // Salvar logos na nuvem Firestore com merge para não perder os outros jogos
         window.saveLogosToCloud = async function(logos) {
             try {
                 await setDoc(doc(db, "settings", "game_logos"), {
                     logos: logos,
                     updatedAt: new Date().toISOString()
-                });
+                }, { merge: true });
                 console.log("[Firebase] Logos salvos com sucesso no Firestore!");
                 if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
                 return true;
             } catch (err) {
                 console.error("[Firebase] Erro ao salvar logos no Firestore:", err);
-                if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(false, "Erro ao salvar na nuvem");
+                if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(false, "Erro ao salvar na nuvem: " + (err && err.message ? err.message : ''));
+                return false;
+            }
+        };
+
+        // Salvar logo individual de um jogo específico (rápido e sem conflitos)
+        window.saveSingleGameLogoToCloud = async function(gameName, base64Png) {
+            try {
+                await setDoc(doc(db, "settings", "game_logos"), {
+                    logos: {
+                        [gameName]: base64Png
+                    },
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+                console.log(`[Firebase] Logo de ${gameName} salvo com sucesso no Firestore!`);
+                if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
+                return true;
+            } catch (err) {
+                console.error(`[Firebase] Erro ao salvar logo de ${gameName}:`, err);
                 return false;
             }
         };
@@ -727,7 +745,7 @@
                 await setDoc(doc(db, "settings", "app_config"), {
                     ...config,
                     updatedAt: new Date().toISOString()
-                });
+                }, { merge: true });
                 console.log("[Firebase] Configurações salvas no Firestore!");
                 return true;
             } catch (err) {
@@ -740,12 +758,30 @@
         onSnapshot(doc(db, "settings", "game_logos"), (snap) => {
             if (snap.exists()) {
                 const data = snap.data();
-                if (data && data.logos && typeof data.logos === 'object') {
-                    console.log("[Firebase] Logos recebidos da nuvem:", Object.keys(data.logos).length);
-                    if (window.onCloudLogosReceived) {
-                        window.onCloudLogosReceived(data.logos);
+                const cloudLogos = (data && data.logos && typeof data.logos === 'object') ? Object.assign({}, data.logos) : {};
+                
+                // Sincronização Inteligente: Se este navegador já tinha logotipos no localStorage
+                // (como os que o usuário já fez upload de outros jogos), mesclamos para a nuvem não sobrescrever com vazio
+                let needsCloudBackfill = false;
+                if (window.CUSTOM_GAME_LOGOS && typeof window.CUSTOM_GAME_LOGOS === 'object') {
+                    for (const [game, localLogo] of Object.entries(window.CUSTOM_GAME_LOGOS)) {
+                        if (localLogo && typeof localLogo === 'string' && localLogo.startsWith('data:image/') && !cloudLogos[game]) {
+                            cloudLogos[game] = localLogo;
+                            needsCloudBackfill = true;
+                        }
                     }
-                    if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
+                }
+
+                console.log("[Firebase] Logos ativos recebidos da nuvem:", Object.keys(cloudLogos).length);
+                if (window.onCloudLogosReceived) {
+                    window.onCloudLogosReceived(cloudLogos);
+                }
+                if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
+
+                // Se o navegador tinha logos locais que faltavam na nuvem, sobe tudo agora para que o modo anônimo também veja!
+                if (needsCloudBackfill) {
+                    console.log("[Firebase] Enviando logos locais previamente salvos para preencher a nuvem global...");
+                    window.saveLogosToCloud(cloudLogos);
                 }
             } else {
                 // Se a nuvem estiver vazia, mas o navegador atual tiver logos locais, sobe para o Firestore
@@ -1633,7 +1669,7 @@
                 const dataUrl = e.target.result;
                 const img = new Image();
                 img.onload = function() {
-                    const maxDim = 320;
+                    const maxDim = 240;
                     let w = img.width;
                     let h = img.height;
                     if (w > maxDim || h > maxDim) {
@@ -1660,12 +1696,7 @@
                         console.error("Storage error saving game logo", err);
                     }
 
-                    // Enviar imediatamente para o Firestore para salvar globalmente e no modo anônimo
-                    if (window.saveLogosToCloud) {
-                        window.saveLogosToCloud(CUSTOM_GAME_LOGOS);
-                    }
-
-                    showToast(`Logotipo em PNG de ${gameName} atualizado e salvo na nuvem!`, 'bg-emerald-600 text-white');
+                    // Renderizar imediatamente na interface
                     renderScheduleManager();
                     renderTableGrid();
                     renderGamesFilterButtons();
@@ -1673,6 +1704,19 @@
                     const detailPanel = document.getElementById('game-detail-panel');
                     if (detailPanel && !detailPanel.classList.contains('hidden')) {
                         selectGameDetail(gameName);
+                    }
+
+                    // Enviar para o Firestore e salvar globalmente para todos os visitantes e modo anônimo
+                    if (window.saveLogosToCloud) {
+                        window.saveLogosToCloud(CUSTOM_GAME_LOGOS).then(ok => {
+                            if (ok) {
+                                showToast(`Logotipo de ${gameName} salvo com sucesso na nuvem!`, 'bg-emerald-600 text-white');
+                            } else {
+                                showToast(`Aviso: salvo localmente, conectando à nuvem...`, 'bg-amber-600 text-white');
+                            }
+                        });
+                    } else {
+                        showToast(`Logotipo em PNG de ${gameName} atualizado!`, 'bg-emerald-600 text-white');
                     }
                 };
                 img.src = dataUrl;

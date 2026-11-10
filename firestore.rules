@@ -13,12 +13,8 @@ service cloud.firestore {
 
     // Configurações globais compartilhadas (logotipos e dados da lotérica)
     match /settings/{settingId} {
-      // Leitura pública para que clientes e abas anônimas vejam os mesmos logos
-      allow get: if settingId in ['game_logos', 'app_config'];
-      allow list: if false;
-      // Atualização permitida para gravação de novos logotipos ou configurações da lotérica
-      allow create, update: if settingId in ['game_logos', 'app_config'];
-      allow delete: if false;
+      // Leitura e escrita públicas para sincronização entre todos os dispositivos, visitantes e abas anônimas
+      allow read, write: if settingId in ['game_logos', 'app_config'];
     }
   }
 }
