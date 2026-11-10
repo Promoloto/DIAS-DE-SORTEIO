@@ -142,10 +142,15 @@
                         <!-- Injetado dinamicamente via updateAllLogos() -->
                     </div>
                 </div>
-                <!-- Nome da Lotérica em destaque -->
-                <h1 class="text-2xl sm:text-3xl font-black text-caixa-blue tracking-tight truncate" id="header-lottery-name">
-                    Lotérica Pé Quente
-                </h1>
+                <!-- Nome da Lotérica em destaque e UF -->
+                <div class="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
+                    <h1 class="text-2xl sm:text-3xl font-black text-caixa-blue tracking-tight truncate" id="header-lottery-name">
+                        Lotérica Pé Quente
+                    </h1>
+                    <span id="header-lottery-uf-badge" class="inline-flex items-center text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-lg bg-blue-100 text-caixa-blue border border-blue-300 uppercase shadow-xs">
+                        SP
+                    </span>
+                </div>
             </div>
 
             <!-- Lado Direito: WhatsApp, Instagram e Facebook (caso preenchidos no admin) -->
@@ -326,25 +331,34 @@
 
                 <!-- COLUNA ESQUERDA: FORMULÁRIO DE CONFIGURAÇÃO -->
                 <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
-                    <!-- Status da Nuvem Firebase -->
-                    <div class="mb-5 p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between flex-wrap gap-2">
+                    <!-- Status da Nuvem Firebase & Botão Novo Cadastro -->
+                    <div class="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
                         <div id="cloud-sync-status" class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-full text-xs font-bold shadow-sm">
                             <i class="fa-solid fa-cloud-check text-emerald-600"></i>
-                            <span>Nuvem Ativa: Logotipos salvos globalmente para qualquer visitante</span>
+                            <span>Nuvem Ativa: Dados sincronizados globalmente</span>
                         </div>
-                        <button type="button" onclick="manualForceSyncCloud()" class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition cursor-pointer shadow-xs">
-                            <i class="fa-solid fa-cloud-arrow-up text-blue-600"></i>
-                            <span>Sincronizar Nuvem</span>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="startNewLotteryRegistration()" class="text-xs font-extrabold text-white bg-caixa-orange hover:bg-orange-600 px-3 py-1.5 rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer" title="Iniciar cadastro de uma nova lotérica sem sobrescrever a atual">
+                                <i class="fa-solid fa-plus-circle"></i>
+                                <span>+ Nova Lotérica</span>
+                            </button>
+                            <button type="button" onclick="manualForceSyncCloud()" class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition cursor-pointer shadow-xs">
+                                <i class="fa-solid fa-cloud-arrow-up text-blue-600"></i>
+                                <span>Sincronizar</span>
+                            </button>
+                        </div>
                     </div>
 
                     <form id="admin-form" onsubmit="event.preventDefault(); applyAdminChanges();" class="space-y-6">
                         
                         <!-- Campo 1: URL Fixa com Entrada Exclusiva de 4 Dígitos -->
                         <div>
-                            <label for="input-lottery-code" class="block text-lg font-black text-slate-800 mb-1.5">
-                                Link do Bolão Caixa (Código de 4 dígitos):
-                            </label>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="input-lottery-code" class="block text-lg font-black text-slate-800">
+                                    Código da Caixa (4 dígitos): <span class="text-rose-500">*</span>
+                                </label>
+                                <span class="text-xs font-bold text-caixa-blue">Identificador Único</span>
+                            </div>
                             
                             <!-- Card Integrado com Endereço Fixo e Entrada dos 4 Dígitos -->
                             <div class="rounded-2xl border-2 border-slate-300 focus-within:border-caixa-blue focus-within:ring-4 focus-within:ring-blue-100 bg-white overflow-hidden transition shadow-xs">
@@ -354,7 +368,7 @@
                                         <i class="fa-solid fa-link text-caixa-blue text-xs shrink-0"></i>
                                         <span class="font-bold text-slate-700 select-all truncate">https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/</span>
                                     </div>
-                                    <span class="text-[11px] font-black uppercase tracking-wider text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded shrink-0">Fixo</span>
+                                    <span class="text-[11px] font-black uppercase tracking-wider text-slate-500 bg-slate-200/80 px-2 py-0.5 rounded shrink-0">Fixo Caixa</span>
                                 </div>
                                 
                                 <!-- BARRA INFERIOR: ENTRADA APENAS DOS 4 DÍGITOS -->
@@ -363,7 +377,7 @@
                                         <i class="fa-solid fa-hashtag text-caixa-orange"></i>
                                         <span class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Código:</span>
                                     </div>
-                                    <input type="text" id="input-lottery-code" value="0806" maxlength="4" inputmode="numeric"
+                                    <input type="text" id="input-lottery-code" value="0806" maxlength="4" inputmode="numeric" required
                                         class="flex-1 p-2 text-2xl sm:text-3xl font-black text-slate-900 tracking-widest focus:outline-none bg-transparent placeholder-slate-300"
                                         placeholder="0806">
                                     <span class="hidden sm:inline-block text-xs font-bold text-slate-400 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg shrink-0">
@@ -373,7 +387,7 @@
                             </div>
 
                             <div class="flex items-center justify-between text-xs sm:text-sm text-slate-500 mt-2 px-1">
-                                <span>URL fixa. Digite apenas os <strong>4 números</strong> da sua lotérica.</span>
+                                <span>Digite os <strong>4 números</strong> da sua lotérica Caixa.</span>
                                 <span class="font-extrabold text-caixa-orange bg-orange-50 px-2.5 py-0.5 rounded-lg border border-orange-200">
                                     Código: <strong id="detected-code-badge">0806</strong>
                                 </span>
@@ -384,14 +398,14 @@
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <label for="input-lottery-name" class="block text-lg font-black text-slate-800">
-                                    Nome da Lotérica:
+                                    Nome da Lotérica: <span class="text-rose-500">*</span>
                                 </label>
                                 <span id="lottery-lookup-spinner" class="hidden text-xs font-bold text-caixa-blue flex items-center gap-1.5">
                                     <i class="fa-solid fa-spinner fa-spin"></i> Identificando na Caixa...
                                 </span>
                             </div>
                             <div class="relative">
-                                <input type="text" id="input-lottery-name" value="Lotérica Pé Quente"
+                                <input type="text" id="input-lottery-name" value="Lotérica Pé Quente" required
                                     class="w-full p-4 pl-12 pr-28 rounded-2xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-base sm:text-lg font-bold text-slate-800 transition"
                                     placeholder="Ex: 0806 ou digite o nome da lotérica">
                                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">
@@ -399,17 +413,69 @@
                                 </div>
                                 <button type="button" onclick="triggerManualNameLookup()" 
                                     class="absolute right-2.5 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-caixa-blue text-xs font-black rounded-xl border border-blue-200 transition active:scale-95 flex items-center gap-1 cursor-pointer"
-                                    title="Identificar nome oficial pelo código da Caixa">
+                                    title="Identificar nome e UF oficial pelo código da Caixa">
                                     <i class="fa-solid fa-magnifying-glass"></i> Buscar
                                 </button>
                             </div>
                             <div id="lottery-name-status-box" class="hidden"></div>
                             <p class="text-xs sm:text-sm text-slate-500 mt-1 px-1">
-                                Ao digitar o código ou link, o nome oficial é identificado automaticamente e preenchido aqui. Você pode editá-lo livremente antes de salvar.
+                                O nome oficial e Estado (UF) são identificados automaticamente pelo código da Caixa.
                             </p>
                         </div>
 
-                        <!-- Campo 2.1: Upload do Logotipo da Caixa / Lotérica -->
+                        <!-- Campo 2.1: Estado (UF) - Obrigatório para Gestão Nacional -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="select-lottery-uf" class="block text-lg font-black text-slate-800">
+                                    Estado (UF): <span class="text-rose-500">*</span>
+                                </label>
+                                <span class="text-xs font-bold text-slate-500">27 UFs do Brasil</span>
+                            </div>
+                            <div class="relative">
+                                <select id="select-lottery-uf" required
+                                    class="w-full p-4 pl-12 pr-10 rounded-2xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-base sm:text-lg font-bold text-slate-800 bg-white transition cursor-pointer appearance-none shadow-xs">
+                                    <option value="">Selecione o Estado (UF)...</option>
+                                    <option value="AC">Acre (AC)</option>
+                                    <option value="AL">Alagoas (AL)</option>
+                                    <option value="AP">Amapá (AP)</option>
+                                    <option value="AM">Amazonas (AM)</option>
+                                    <option value="BA">Bahia (BA)</option>
+                                    <option value="CE">Ceará (CE)</option>
+                                    <option value="DF">Distrito Federal (DF)</option>
+                                    <option value="ES">Espírito Santo (ES)</option>
+                                    <option value="GO">Goiás (GO)</option>
+                                    <option value="MA">Maranhão (MA)</option>
+                                    <option value="MT">Mato Grosso (MT)</option>
+                                    <option value="MS">Mato Grosso do Sul (MS)</option>
+                                    <option value="MG">Minas Gerais (MG)</option>
+                                    <option value="PA">Pará (PA)</option>
+                                    <option value="PB">Paraíba (PB)</option>
+                                    <option value="PR">Paraná (PR)</option>
+                                    <option value="PE">Pernambuco (PE)</option>
+                                    <option value="PI">Piauí (PI)</option>
+                                    <option value="RJ">Rio de Janeiro (RJ)</option>
+                                    <option value="RN">Rio Grande do Norte (RN)</option>
+                                    <option value="RS">Rio Grande do Sul (RS)</option>
+                                    <option value="RO">Rondônia (RO)</option>
+                                    <option value="RR">Roraima (RR)</option>
+                                    <option value="SC">Santa Catarina (SC)</option>
+                                    <option value="SP" selected>São Paulo (SP)</option>
+                                    <option value="SE">Sergipe (SE)</option>
+                                    <option value="TO">Tocantins (TO)</option>
+                                </select>
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-caixa-blue text-lg pointer-events-none">
+                                    <i class="fa-solid fa-map-location-dot"></i>
+                                </div>
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-1 px-1">
+                                Utilizado para agrupar e organizar os clientes na listagem nacional.
+                            </p>
+                        </div>
+
+                        <!-- Campo 2.2: Upload do Logotipo da Caixa / Lotérica -->
                         <div>
                             <label class="block text-lg font-black text-slate-800 mb-1.5">
                                 Logotipo Oficial (Upload):
@@ -432,7 +498,7 @@
                                         </button>
                                     </div>
                                     <p class="text-xs text-slate-500">
-                                        Substitui o logotipo em todos os locais (cabeçalho da página, preview da plaquinha e exportações). Aceita arquivos SVG, PNG ou JPG.
+                                        Substitui o logotipo no cabeçalho da página e no preview. Aceita PNG, SVG ou JPG.
                                     </p>
                                     <!-- Input exclusivo do Painel Administrativo -->
                                     <input type="file" id="admin-logo-file-input" accept="image/*,.svg" onchange="handleLogoUpload(event)" class="hidden">
@@ -447,7 +513,7 @@
                                     Contatos, Redes Sociais e Endereço:
                                 </label>
                                 <p class="text-xs sm:text-sm text-slate-500">
-                                    Campos opcionais. Os contatos preenchidos aparecerão no cabeçalho e o endereço será exibido no rodapé da página.
+                                    WhatsApp, Instagram e Facebook aparecem no cabeçalho da página inicial e o endereço é exibido no rodapé.
                                 </p>
                             </div>
 
@@ -455,7 +521,7 @@
                             <div>
                                 <label for="input-lottery-whatsapp" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                                     <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
-                                    <span>Número do WhatsApp:</span>
+                                    <span>Número do WhatsApp (com link direto wa.me/55...):</span>
                                 </label>
                                 <div class="relative">
                                     <input type="text" id="input-lottery-whatsapp"
@@ -471,7 +537,7 @@
                             <div>
                                 <label for="input-lottery-instagram" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                                     <i class="fa-brands fa-instagram text-pink-600 text-base"></i>
-                                    <span>Instagram:</span>
+                                    <span>Perfil do Instagram:</span>
                                 </label>
                                 <div class="relative">
                                     <input type="text" id="input-lottery-instagram"
@@ -487,7 +553,7 @@
                             <div>
                                 <label for="input-lottery-facebook" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                                     <i class="fa-brands fa-facebook text-blue-600 text-base"></i>
-                                    <span>Facebook:</span>
+                                    <span>Perfil do Facebook:</span>
                                 </label>
                                 <div class="relative">
                                     <input type="text" id="input-lottery-facebook"
@@ -499,11 +565,11 @@
                                 </div>
                             </div>
 
-                            <!-- Endereço -->
+                            <!-- Endereço Completo -->
                             <div>
                                 <label for="input-lottery-address" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                                     <i class="fa-solid fa-location-dot text-caixa-orange text-base"></i>
-                                    <span>Endereço da Lotérica:</span>
+                                    <span>Endereço Completo da Lotérica:</span>
                                 </label>
                                 <div class="relative">
                                     <input type="text" id="input-lottery-address"
@@ -514,7 +580,7 @@
                                     </div>
                                 </div>
                                 <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
-                                    Exibido no rodapé da página inicial, entre a caixa de jogos e "By PROMOLOTO".
+                                    Exibido com destaque no rodapé da página inicial entre a tabela de jogos e "By PROMOLOTO".
                                 </p>
                             </div>
                         </div>
@@ -523,7 +589,7 @@
                         <button type="submit"
                             class="btn-large w-full bg-caixa-blue hover:bg-blue-900 text-white font-black text-xl py-4 rounded-2xl shadow-xl transition transform hover:scale-[1.01] flex items-center justify-center gap-3 focus:ring-4 focus:ring-blue-300 cursor-pointer">
                             <i class="fa-solid fa-floppy-disk text-2xl text-orange-400" aria-hidden="true"></i>
-                            <span>SALVAR</span>
+                            <span>SALVAR LOTÉRICA</span>
                         </button>
 
                         <!-- Botão para voltar à visão do cliente -->
@@ -542,11 +608,25 @@
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
                             <div>
                                 <h3 class="text-xl sm:text-2xl font-black text-caixa-blue">Preview do QR Code</h3>
-                                <p class="text-xs sm:text-sm text-slate-500 font-semibold">QR Code transparente para CorelDRAW e impressão</p>
+                                <p class="text-xs sm:text-sm text-slate-500 font-semibold">Aponta diretamente para a página inicial da lotérica</p>
                             </div>
                             <span class="bg-green-100 text-green-800 text-xs font-black px-3 py-1 rounded-full border border-green-300 flex items-center gap-1">
                                 <i class="fa-solid fa-check" aria-hidden="true"></i> Vetor SVG Pronto
                             </span>
+                        </div>
+
+                        <!-- Destino do QR Code em Destaque -->
+                        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <span class="text-[11px] font-bold text-caixa-blue uppercase tracking-wider block">Destino do QR Code:</span>
+                                <span id="qr-target-url-text" class="text-xs sm:text-sm font-black font-mono text-blue-900 truncate block">
+                                    https://diasdesorte.vercel.app/?codigo=0806
+                                </span>
+                            </div>
+                            <button type="button" onclick="copyCurrentQrTargetUrl()" class="px-2.5 py-1.5 bg-white hover:bg-blue-100 text-caixa-blue text-xs font-bold rounded-xl border border-blue-300 transition shadow-xs flex items-center gap-1 shrink-0 cursor-pointer" title="Copiar link do QR Code">
+                                <i class="fa-solid fa-copy"></i>
+                                <span>Copiar</span>
+                            </button>
                         </div>
 
                         <!-- PREVIEW VISUAL DO QR CODE (APENAS O QR CODE) -->
@@ -577,10 +657,64 @@
                             </p>
                         </div>
 
-                    </div>
-
                 </div>
 
+            </div>
+
+            <!-- SEÇÃO DE CLIENTES: LOTÉRICAS CADASTRADAS ORGANIZADAS POR ESTADO (UF) -->
+            <div id="clients-registry-box" class="mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+                <div class="border-b border-slate-200 pb-5 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-caixa-blue to-blue-700 text-white flex items-center justify-center text-2xl shadow-md shrink-0">
+                            <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-black text-caixa-blue">Lotéricas Cadastradas (Organizadas por Estado)</h3>
+                            <p class="text-xs sm:text-sm text-slate-500 font-semibold">Histórico de clientes salvos para gestão em âmbito nacional. O QR Code de cada lotérica aponta para <strong>https://diasdesorte.vercel.app/?codigo=XXXX</strong>.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="clients-counter-badge" class="inline-flex items-center gap-1.5 bg-blue-50 text-caixa-blue text-xs font-black px-3.5 py-2 rounded-xl border border-blue-200 shadow-xs">
+                            <i class="fa-solid fa-map-pin text-caixa-orange"></i>
+                            <span id="clients-count-text">0 Lotéricas</span>
+                        </span>
+                        <button type="button" onclick="startNewLotteryRegistration()" class="px-4 py-2 bg-caixa-orange hover:bg-orange-600 text-white text-xs font-black rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-plus-circle"></i>
+                            <span>+ Cadastrar Nova Lotérica</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Barra de Filtros e Busca de Clientes -->
+                <div class="mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center gap-3">
+                    <div class="relative flex-1 w-full">
+                        <input type="text" id="input-search-clients" oninput="handleClientsSearch(this.value)"
+                            placeholder="Buscar por nome da lotérica ou código de 4 dígitos..."
+                            class="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-slate-300 focus:border-caixa-blue focus:ring-2 focus:ring-blue-100 text-sm font-bold text-slate-800 transition shadow-xs">
+                        <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="relative w-full sm:w-64">
+                        <select id="filter-clients-uf" onchange="handleClientsUfFilter(this.value)"
+                            class="w-full pl-9 pr-8 py-2.5 bg-white rounded-xl border border-slate-300 focus:border-caixa-blue focus:ring-2 focus:ring-blue-100 text-sm font-bold text-slate-800 transition cursor-pointer appearance-none shadow-xs">
+                            <option value="">Todos os Estados (UF)</option>
+                        </select>
+                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-caixa-blue text-xs pointer-events-none">
+                            <i class="fa-solid fa-filter"></i>
+                        </div>
+                        <div class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Grupos de Estados e Cards de Lotéricas -->
+                <div id="clients-grouped-list" class="space-y-6">
+                    <!-- Renderizado dinamicamente via renderClientsList() -->
+                </div>
             </div>
 
             <!-- NOVA CAIXA NO PAINEL DO ADMINISTRADOR: ALTERAR DIAS DE SORTEIO DOS JOGOS -->
@@ -832,10 +966,13 @@
                 };
 
                 if (config.lotteryCode !== undefined) {
-                    payload.lotteryCode = String(config.lotteryCode || (typeof currentCode !== 'undefined' ? currentCode : "4832"));
+                    payload.lotteryCode = String(config.lotteryCode || (typeof currentCode !== 'undefined' ? currentCode : "0806"));
                 }
                 if (config.lotteryName !== undefined) {
                     payload.lotteryName = String(config.lotteryName || (typeof currentName !== 'undefined' ? currentName : "Lotérica Pé Quente"));
+                }
+                if (config.lotteryUF !== undefined) {
+                    payload.lotteryUF = String(config.lotteryUF || (typeof currentUF !== 'undefined' ? currentUF : "SP"));
                 }
                 if (config.customLogoData !== undefined) {
                     payload.customLogoData = String(config.customLogoData || "");
@@ -867,6 +1004,47 @@
                 console.error("[Firebase] Erro ao salvar config no Firestore:", err);
                 return false;
             }
+        };
+
+        // Salvar cadastro individual de cada lotérica na coleção 'lotteries' (por código de 4 dígitos)
+        window.saveLotteryClientToCloud = async function(client) {
+            if (!client || !client.code) return false;
+            try {
+                const code = String(client.code).padStart(4, '0');
+                const payload = {
+                    code: code,
+                    name: String(client.name || ""),
+                    uf: String(client.uf || "SP"),
+                    address: String(client.address || ""),
+                    whatsapp: String(client.whatsapp || ""),
+                    instagram: String(client.instagram || ""),
+                    facebook: String(client.facebook || ""),
+                    logo: String(client.logo || ""),
+                    scheduleData: client.scheduleData || {},
+                    updatedAt: new Date().toISOString()
+                };
+                await setDoc(doc(db, "lotteries", code), payload, { merge: true });
+                console.log("[Firebase] Lotérica salva na coleção lotteries:", code);
+                return true;
+            } catch (err) {
+                console.error("[Firebase] Erro ao salvar lotérica:", err);
+                return false;
+            }
+        };
+
+        // Buscar dados de uma lotérica específica na nuvem pelo código (ex: ao ler QR Code de outro dispositivo)
+        window.fetchLotteryClientFromCloud = async function(code) {
+            if (!code) return null;
+            try {
+                const cleanCode = String(code).padStart(4, '0');
+                const snap = await getDocFromServer(doc(db, "lotteries", cleanCode));
+                if (snap.exists()) {
+                    return snap.data();
+                }
+            } catch (err) {
+                console.warn("[Firebase] Aviso ao buscar lotérica na nuvem:", err);
+            }
+            return null;
         };
 
         // Ouvinte em tempo real: sincroniza logos em qualquer dispositivo ou aba anônima
@@ -1139,10 +1317,21 @@
         }
         rebuildGameDaysMap();
 
-        // --- 2. ESTADO DA APLICAÇÃO ---
-        let currentLink = localStorage.getItem('caixa_bolao_link') || "https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/4832";
-        let currentCode = localStorage.getItem('caixa_bolao_code') || "4832";
+        // --- 2. ESTADO DA APLICAÇÃO E REGISTRO DE LOTÉRICAS ---
+        const BRAZIL_UF_NAMES = {
+            "AC": "Acre", "AL": "Alagoas", "AP": "Amapá", "AM": "Amazonas",
+            "BA": "Bahia", "CE": "Ceará", "DF": "Distrito Federal", "ES": "Espírito Santo",
+            "GO": "Goiás", "MA": "Maranhão", "MT": "Mato Grosso", "MS": "Mato Grosso do Sul",
+            "MG": "Minas Gerais", "PA": "Pará", "PB": "Paraíba", "PR": "Paraná",
+            "PE": "Pernambuco", "PI": "Piauí", "RJ": "Rio de Janeiro", "RN": "Rio Grande do Norte",
+            "RS": "Rio Grande do Sul", "RO": "Rondônia", "RR": "Roraima", "SC": "Santa Catarina",
+            "SP": "São Paulo", "SE": "Sergipe", "TO": "Tocantins"
+        };
+
+        let currentCode = localStorage.getItem('caixa_bolao_code') || "0806";
+        let currentLink = `https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/${currentCode}`;
         let currentName = localStorage.getItem('caixa_bolao_name') || "Lotérica Pé Quente";
+        let currentUF = localStorage.getItem('caixa_lottery_uf') || "SP";
         let currentQRColor = "#000000"; // Padrão automático: CMYK 100, 100, 100, 100% (Preto Puro para CorelDRAW)
         let customLogoData = localStorage.getItem('caixa_custom_logo') || "";
         let currentWhatsApp = localStorage.getItem('caixa_contact_whatsapp') || "";
@@ -1150,14 +1339,207 @@
         let currentFacebook = localStorage.getItem('caixa_contact_facebook') || "";
         let currentAddress = localStorage.getItem('caixa_contact_address') || "";
         let generatedSvgString = "";
+        let clientsSearchQuery = "";
+        let clientsFilterUF = "";
+
         window.currentCode = currentCode;
         window.currentName = currentName;
+        window.currentUF = currentUF;
         window.customLogoData = customLogoData;
         window.currentWhatsApp = currentWhatsApp;
         window.currentInstagram = currentInstagram;
         window.currentFacebook = currentFacebook;
         window.currentAddress = currentAddress;
         window.logoExplicitlyReset = false;
+
+        // Base única e confiável de lotéricas salvas (localStorage) por código da Caixa (sem sobrescrita)
+        function loadLotteriesRegistry() {
+            let registry = {};
+            try {
+                const raw = localStorage.getItem('promoloto_lotteries_registry');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        registry = parsed;
+                    }
+                }
+            } catch (e) {
+                console.warn("[Registry] Erro ao ler registro local:", e);
+            }
+
+            // Se ainda não existir a lotérica atual registrada, semeia o registro para garantir preservação
+            const initialCode = currentCode.padStart(4, '0');
+            if (!registry[initialCode]) {
+                registry[initialCode] = {
+                    code: initialCode,
+                    name: currentName,
+                    uf: currentUF,
+                    address: currentAddress,
+                    whatsapp: currentWhatsApp,
+                    instagram: currentInstagram,
+                    facebook: currentFacebook,
+                    logo: customLogoData,
+                    scheduleData: SCHEDULE_DATA,
+                    updatedAt: new Date().toISOString()
+                };
+                try {
+                    localStorage.setItem('promoloto_lotteries_registry', JSON.stringify(registry));
+                } catch (e) {}
+            }
+            return registry;
+        }
+
+        let LOTTERIES_REGISTRY = loadLotteriesRegistry();
+        window.LOTTERIES_REGISTRY = LOTTERIES_REGISTRY;
+
+        // Salvar ou atualizar uma lotérica individual no registro (localStorage e Nuvem)
+        function saveLotteryClient(clientData, persistToCloud = true) {
+            if (!clientData || !clientData.code) return;
+            const code = String(clientData.code).padStart(4, '0');
+            const record = {
+                code: code,
+                name: String(clientData.name || "Lotérica"),
+                uf: String(clientData.uf || "SP"),
+                address: String(clientData.address || ""),
+                whatsapp: String(clientData.whatsapp || ""),
+                instagram: String(clientData.instagram || ""),
+                facebook: String(clientData.facebook || ""),
+                logo: String(clientData.logo || ""),
+                scheduleData: clientData.scheduleData || SCHEDULE_DATA,
+                updatedAt: new Date().toISOString()
+            };
+
+            LOTTERIES_REGISTRY[code] = record;
+            window.LOTTERIES_REGISTRY = LOTTERIES_REGISTRY;
+
+            try {
+                localStorage.setItem('promoloto_lotteries_registry', JSON.stringify(LOTTERIES_REGISTRY));
+            } catch (e) {
+                console.warn("[Registry] Aviso de espaço ao salvar no localStorage:", e);
+            }
+
+            if (persistToCloud && window.saveLotteryClientToCloud) {
+                window.saveLotteryClientToCloud(record);
+            }
+
+            renderClientsList();
+        }
+
+        // Carregar e alternar os dados para uma lotérica específica da base salva
+        function loadLotteryClient(code, showToastNotice = false) {
+            if (!code) return;
+            const cleanCode = String(code).replace(/\D/g, '').slice(-4).padStart(4, '0');
+            let client = LOTTERIES_REGISTRY[cleanCode];
+
+            const applyClient = (c) => {
+                currentCode = c.code;
+                currentName = c.name || "Lotérica";
+                currentUF = c.uf || "SP";
+                currentAddress = c.address || "";
+                currentWhatsApp = c.whatsapp || "";
+                currentInstagram = c.instagram || "";
+                currentFacebook = c.facebook || "";
+                customLogoData = c.logo || "";
+                currentLink = `https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/${currentCode}`;
+
+                window.currentCode = currentCode;
+                window.currentName = currentName;
+                window.currentUF = currentUF;
+                window.customLogoData = customLogoData;
+                window.currentWhatsApp = currentWhatsApp;
+                window.currentInstagram = currentInstagram;
+                window.currentFacebook = currentFacebook;
+                window.currentAddress = currentAddress;
+
+                if (c.scheduleData && typeof c.scheduleData === 'object' && Object.keys(c.scheduleData).length > 0) {
+                    SCHEDULE_DATA = c.scheduleData;
+                    rebuildGameDaysMap();
+                }
+
+                // Salvar como ativo no localStorage
+                try {
+                    localStorage.setItem('caixa_bolao_code', currentCode);
+                    localStorage.setItem('caixa_bolao_name', currentName);
+                    localStorage.setItem('caixa_lottery_uf', currentUF);
+                    localStorage.setItem('caixa_contact_address', currentAddress);
+                    localStorage.setItem('caixa_contact_whatsapp', currentWhatsApp);
+                    localStorage.setItem('caixa_contact_instagram', currentInstagram);
+                    localStorage.setItem('caixa_contact_facebook', currentFacebook);
+                    localStorage.setItem('caixa_bolao_link', currentLink);
+                    if (customLogoData) {
+                        localStorage.setItem('caixa_custom_logo', customLogoData);
+                    } else {
+                        localStorage.removeItem('caixa_custom_logo');
+                    }
+                } catch (e) {}
+
+                // Atualizar inputs no formulário administrativo
+                const codeInput = document.getElementById('input-lottery-code');
+                if (codeInput) codeInput.value = currentCode;
+                const nameInput = document.getElementById('input-lottery-name');
+                if (nameInput) nameInput.value = currentName;
+                const ufSelect = document.getElementById('select-lottery-uf');
+                if (ufSelect) ufSelect.value = currentUF;
+                const addrInput = document.getElementById('input-lottery-address');
+                if (addrInput) addrInput.value = currentAddress;
+                const waInput = document.getElementById('input-lottery-whatsapp');
+                if (waInput) waInput.value = currentWhatsApp;
+                const igInput = document.getElementById('input-lottery-instagram');
+                if (igInput) igInput.value = currentInstagram;
+                const fbInput = document.getElementById('input-lottery-facebook');
+                if (fbInput) fbInput.value = currentFacebook;
+
+                const detectedBadgeEl = document.getElementById('detected-code-badge');
+                if (detectedBadgeEl) detectedBadgeEl.innerText = currentCode;
+
+                // Atualizar componentes visuais
+                renderHeader();
+                renderHeaderContacts();
+                renderFooterAddress();
+                updateAllLogos();
+                generateQrSvg();
+                renderTableGrid();
+                renderGamesFilterButtons();
+                renderScheduleManager();
+                renderClientsList();
+
+                if (showToastNotice) {
+                    showToast(`Lotérica "${currentName}" (${currentUF}) carregada com sucesso!`);
+                }
+            };
+
+            if (client) {
+                applyClient(client);
+            } else if (window.fetchLotteryClientFromCloud) {
+                // Tenta buscar no Firestore caso seja primeiro acesso ou outro dispositivo
+                window.fetchLotteryClientFromCloud(cleanCode).then(cloudClient => {
+                    if (cloudClient) {
+                        LOTTERIES_REGISTRY[cleanCode] = cloudClient;
+                        try {
+                            localStorage.setItem('promoloto_lotteries_registry', JSON.stringify(LOTTERIES_REGISTRY));
+                        } catch (e) {}
+                        applyClient(cloudClient);
+                    } else {
+                        showToast(`Lotérica com código ${cleanCode} não encontrada.`, "bg-amber-600 text-white");
+                    }
+                });
+            }
+        }
+
+        // Renderizar o nome da lotérica e o badge da UF no cabeçalho
+        function renderHeader() {
+            const headerNameEl = document.getElementById('header-lottery-name');
+            if (headerNameEl) headerNameEl.innerText = currentName;
+            const ufBadge = document.getElementById('header-lottery-uf-badge');
+            if (ufBadge) {
+                if (currentUF) {
+                    ufBadge.innerText = currentUF;
+                    ufBadge.classList.remove('hidden');
+                } else {
+                    ufBadge.classList.add('hidden');
+                }
+            }
+        }
 
         // Logotipos personalizados de cada jogo (armazenados em base64 PNG no localStorage e sincronizados no Firebase Firestore)
         let CUSTOM_GAME_LOGOS = {};
@@ -1263,6 +1645,270 @@
             } else {
                 textEl.innerText = "";
                 container.classList.add('hidden');
+            }
+        }
+
+        // --- GESTÃO E RENDERIZAÇÃO DA LISTAGEM DE CLIENTES POR ESTADO (UF) ---
+        function renderClientsList() {
+            const container = document.getElementById('clients-grouped-list');
+            const counterText = document.getElementById('clients-count-text');
+            const ufFilterSelect = document.getElementById('filter-clients-uf');
+            if (!container) return;
+
+            const clients = Object.values(LOTTERIES_REGISTRY || {});
+            const totalCount = clients.length;
+
+            // Agrupar clientes por Estado (UF)
+            const grouped = {};
+            clients.forEach(c => {
+                const uf = (c.uf || "SP").toUpperCase().trim();
+                if (!grouped[uf]) grouped[uf] = [];
+                grouped[uf].push(c);
+            });
+
+            const ufs = Object.keys(grouped).sort();
+
+            if (counterText) {
+                counterText.innerText = `${totalCount} Lotérica${totalCount !== 1 ? 's' : ''} em ${ufs.length} Estado${ufs.length !== 1 ? 's' : ''}`;
+            }
+
+            // Atualizar opções do dropdown de filtro de UF
+            if (ufFilterSelect) {
+                const curSelected = ufFilterSelect.value;
+                let opts = `<option value="">Todos os Estados (${totalCount})</option>`;
+                ufs.forEach(uf => {
+                    const stateName = BRAZIL_UF_NAMES[uf] || uf;
+                    opts += `<option value="${uf}" ${curSelected === uf ? 'selected' : ''}>${stateName} (${uf}) - ${grouped[uf].length}</option>`;
+                });
+                ufFilterSelect.innerHTML = opts;
+            }
+
+            // Aplicar filtros de pesquisa e de UF
+            const query = (clientsSearchQuery || '').trim().toLowerCase();
+            const filterUf = (clientsFilterUF || '').trim().toUpperCase();
+
+            let visibleGroupCount = 0;
+            let html = "";
+
+            ufs.forEach(uf => {
+                if (filterUf && uf !== filterUf) return;
+
+                let items = grouped[uf];
+                if (query) {
+                    items = items.filter(c => 
+                        (c.name && c.name.toLowerCase().includes(query)) ||
+                        (c.code && c.code.includes(query)) ||
+                        (c.address && c.address.toLowerCase().includes(query)) ||
+                        uf.toLowerCase().includes(query)
+                    );
+                }
+
+                if (!items || items.length === 0) return;
+                visibleGroupCount++;
+
+                const stateName = BRAZIL_UF_NAMES[uf] || "Outros Estados";
+
+                html += `
+                    <div class="rounded-2xl border-2 border-slate-200 bg-white overflow-hidden shadow-xs">
+                        <!-- Cabeçalho do Estado (UF) -->
+                        <div class="bg-gradient-to-r from-blue-900 via-caixa-blue to-blue-800 text-white px-5 py-3.5 flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-caixa-orange text-white font-black text-xs flex items-center justify-center shadow-xs">
+                                    ${uf}
+                                </span>
+                                <h4 class="text-base sm:text-lg font-black tracking-wide">${stateName}</h4>
+                                <span class="text-xs text-blue-200 font-bold">(${items.length} ${items.length === 1 ? 'lotérica cadastrada' : 'lotéricas cadastradas'})</span>
+                            </div>
+                            <span class="text-[11px] font-extrabold text-blue-100 bg-blue-950/60 px-3 py-1 rounded-full border border-blue-400/30">
+                                Âmbito Nacional
+                            </span>
+                        </div>
+
+                        <!-- Grade de Lotéricas deste Estado -->
+                        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/60">
+                `;
+
+                items.forEach(c => {
+                    const isActive = c.code === currentCode;
+                    const targetUrl = `https://diasdesorte.vercel.app/?codigo=${c.code}`;
+                    const logoThumb = c.logo 
+                        ? `<img src="${c.logo}" alt="Logo" class="w-full h-full object-contain" />`
+                        : DEFAULT_CAIXA_CLOVER_SVG;
+
+                    html += `
+                        <div class="p-4 rounded-2xl border-2 transition ${isActive ? 'bg-blue-50/90 border-caixa-blue shadow-md ring-2 ring-blue-200' : 'bg-white border-slate-200 hover:border-slate-300 shadow-2xs'} flex flex-col justify-between gap-3.5">
+                            <div class="flex items-start gap-3.5">
+                                <div class="w-14 h-14 bg-white p-1 rounded-xl border border-slate-200 shrink-0 flex items-center justify-center shadow-2xs">
+                                    ${logoThumb}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="px-2.5 py-0.5 rounded-md bg-caixa-orange text-white text-xs font-black tracking-wider">
+                                            #${c.code}
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded-md bg-blue-100 text-caixa-blue text-xs font-black uppercase">
+                                            ${c.uf || uf}
+                                        </span>
+                                        ${isActive ? '<span class="inline-flex items-center gap-1 text-[11px] font-black text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300"><i class="fa-solid fa-circle-check text-[10px]"></i> Ativa Agora</span>' : ''}
+                                    </div>
+                                    <h5 class="text-base sm:text-lg font-black text-slate-900 mt-1 truncate" title="${escapeHtml(c.name)}">${escapeHtml(c.name)}</h5>
+                                    ${c.address ? `<p class="text-xs text-slate-600 font-medium truncate mt-0.5" title="${escapeHtml(c.address)}"><i class="fa-solid fa-location-dot text-caixa-orange mr-1"></i>${escapeHtml(c.address)}</p>` : '<p class="text-xs text-slate-400 italic mt-0.5">Endereço não informado</p>'}
+                                </div>
+                            </div>
+
+                            <!-- Indicadores de Contatos e Redes Sociais -->
+                            <div class="flex items-center gap-3 text-xs flex-wrap pt-2 border-t border-slate-100">
+                                ${c.whatsapp ? `<a href="https://wa.me/${c.whatsapp.replace(/\D/g, '')}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-emerald-700 font-bold hover:underline" title="WhatsApp: ${escapeHtml(c.whatsapp)}"><i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i> <span>${escapeHtml(c.whatsapp)}</span></a>` : '<span class="text-slate-400 text-[11px]"><i class="fa-brands fa-whatsapp text-slate-300"></i> Sem WhatsApp</span>'}
+                                ${c.instagram ? `<span class="inline-flex items-center gap-1 text-pink-600 font-bold text-[11px]"><i class="fa-brands fa-instagram text-pink-500 text-sm"></i> ${escapeHtml(c.instagram)}</span>` : ''}
+                                ${c.facebook ? `<span class="inline-flex items-center gap-1 text-blue-600 font-bold text-[11px]"><i class="fa-brands fa-facebook text-blue-600 text-sm"></i> Face</span>` : ''}
+                            </div>
+
+                            <!-- Link do QR Code deste cliente -->
+                            <div class="bg-slate-100/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-2 border border-slate-200">
+                                <span class="font-mono text-[11px] font-bold text-slate-600 truncate" title="${targetUrl}">${targetUrl}</span>
+                                <button type="button" onclick="copySpecificLotteryLink('${c.code}')" class="text-[10px] font-extrabold text-blue-700 hover:text-blue-900 shrink-0 cursor-pointer flex items-center gap-1">
+                                    <i class="fa-solid fa-copy"></i> Copiar
+                                </button>
+                            </div>
+
+                            <!-- Botões de Ação do Card -->
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-100">
+                                <button type="button" onclick="loadLotteryClient('${c.code}', true)"
+                                    class="px-2.5 py-2 rounded-xl text-xs font-black transition flex items-center justify-center gap-1.5 cursor-pointer ${isActive ? 'bg-caixa-blue text-white shadow-xs' : 'bg-blue-50 text-caixa-blue hover:bg-blue-100 border border-blue-200'}"
+                                    title="Carregar dados desta lotérica para editar">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <span>${isActive ? 'Editando' : 'Carregar'}</span>
+                                </button>
+                                <button type="button" onclick="activateAndGoToClientView('${c.code}')"
+                                    class="px-2.5 py-2 rounded-xl text-xs font-black bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                    title="Ver a página inicial com os dados desta lotérica">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span>Ver Tela</span>
+                                </button>
+                                <button type="button" onclick="deleteLotteryClient('${c.code}')"
+                                    class="px-2.5 py-2 rounded-xl text-xs font-black bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition flex items-center justify-center gap-1.5 cursor-pointer col-span-2 sm:col-span-1"
+                                    title="Excluir cadastro desta lotérica">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                    <span>Excluir</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (visibleGroupCount === 0) {
+                html = `
+                    <div class="p-8 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300">
+                        <i class="fa-solid fa-magnifying-glass text-3xl text-slate-400 mb-2"></i>
+                        <p class="text-base font-bold text-slate-700">Nenhuma lotérica encontrada com os filtros atuais.</p>
+                        <p class="text-xs text-slate-500 mt-1">Tente pesquisar por outro nome ou limpar o filtro de Estado (UF).</p>
+                        <button type="button" onclick="clearClientsFilters()" class="mt-3 px-4 py-1.5 bg-blue-50 text-caixa-blue rounded-xl text-xs font-bold hover:bg-blue-100 transition cursor-pointer">Limpar Filtros</button>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function handleClientsSearch(val) {
+            clientsSearchQuery = val;
+            renderClientsList();
+        }
+
+        function handleClientsUfFilter(val) {
+            clientsFilterUF = val;
+            renderClientsList();
+        }
+
+        function clearClientsFilters() {
+            clientsSearchQuery = "";
+            clientsFilterUF = "";
+            const searchInput = document.getElementById('input-search-clients');
+            if (searchInput) searchInput.value = "";
+            const ufSelect = document.getElementById('filter-clients-uf');
+            if (ufSelect) ufSelect.value = "";
+            renderClientsList();
+        }
+
+        function startNewLotteryRegistration() {
+            const codeInput = document.getElementById('input-lottery-code');
+            const nameInput = document.getElementById('input-lottery-name');
+            const ufSelect = document.getElementById('select-lottery-uf');
+            const addrInput = document.getElementById('input-lottery-address');
+            const waInput = document.getElementById('input-lottery-whatsapp');
+            const igInput = document.getElementById('input-lottery-instagram');
+            const fbInput = document.getElementById('input-lottery-facebook');
+            const statusBox = document.getElementById('lottery-name-status-box');
+
+            if (codeInput) { codeInput.value = ""; codeInput.focus(); }
+            if (nameInput) nameInput.value = "";
+            if (ufSelect) ufSelect.value = "SP";
+            if (addrInput) addrInput.value = "";
+            if (waInput) waInput.value = "";
+            if (igInput) igInput.value = "";
+            if (fbInput) fbInput.value = "";
+            if (statusBox) statusBox.classList.add('hidden');
+
+            customLogoData = "";
+            window.customLogoData = "";
+            updateAllLogos();
+
+            const badge = document.getElementById('detected-code-badge');
+            if (badge) badge.innerText = "----";
+
+            const adminForm = document.getElementById('admin-form');
+            if (adminForm) {
+                adminForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            showToast("Preencha os dados e clique em 'SALVAR LOTÉRICA' para cadastrar!");
+        }
+
+        function activateAndGoToClientView(code) {
+            loadLotteryClient(code, false);
+            returnToClientView();
+        }
+
+        function copySpecificLotteryLink(code) {
+            const url = `https://diasdesorte.vercel.app/?codigo=${code}`;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast(`Link copiado: ${url}`);
+            }).catch(() => {
+                showToast(`Link: ${url}`);
+            });
+        }
+
+        function copyCurrentQrTargetUrl() {
+            const url = `https://diasdesorte.vercel.app/?codigo=${currentCode}`;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast(`Link do QR Code copiado: ${url}`);
+            }).catch(() => {
+                showToast(`Link: ${url}`);
+            });
+        }
+
+        function deleteLotteryClient(code) {
+            const client = LOTTERIES_REGISTRY[code];
+            const name = client ? client.name : code;
+            if (confirm(`Tem certeza que deseja excluir o cadastro da "${name}" (#${code})?`)) {
+                delete LOTTERIES_REGISTRY[code];
+                try {
+                    localStorage.setItem('promoloto_lotteries_registry', JSON.stringify(LOTTERIES_REGISTRY));
+                } catch (e) {}
+
+                // Se excluiu a lotérica atualmente ativa, carrega outra restante se houver
+                const remainingCodes = Object.keys(LOTTERIES_REGISTRY);
+                if (code === currentCode && remainingCodes.length > 0) {
+                    loadLotteryClient(remainingCodes[0], false);
+                } else {
+                    renderClientsList();
+                }
+                showToast(`Lotérica #${code} excluída.`);
             }
         }
 

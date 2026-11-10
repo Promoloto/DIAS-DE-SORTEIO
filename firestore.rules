@@ -21,5 +21,10 @@ service cloud.firestore {
     match /game_logos/{gameId} {
       allow read, write: if true;
     }
+
+    // Cadastro de clientes (Lotéricas) por código da Caixa (para busca via QR Code e gestão multi-cliente)
+    match /lotteries/{lotteryId} {
+      allow read, write: if true;
+    }
   }
 }

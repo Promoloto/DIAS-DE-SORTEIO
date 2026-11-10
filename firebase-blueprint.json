@@ -40,6 +40,51 @@
           "description": "Timestamp ISO da última alteração"
         }
       }
+    },
+    "LotteryClient": {
+      "title": "LotteryClient",
+      "description": "Cadastro individual de cada cliente (Lotérica) identificado pelo código de 4 dígitos da Caixa",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Código de 4 dígitos da lotérica"
+        },
+        "name": {
+          "type": "string",
+          "description": "Nome da unidade lotérica"
+        },
+        "uf": {
+          "type": "string",
+          "description": "Estado / Unidade Federativa (UF)"
+        },
+        "address": {
+          "type": "string",
+          "description": "Endereço completo da lotérica"
+        },
+        "whatsapp": {
+          "type": "string",
+          "description": "Número de WhatsApp da lotérica"
+        },
+        "instagram": {
+          "type": "string",
+          "description": "Perfil do Instagram da lotérica"
+        },
+        "facebook": {
+          "type": "string",
+          "description": "Perfil ou página do Facebook da lotérica"
+        },
+        "logo": {
+          "type": "string",
+          "description": "Logotipo personalizado em base64 ou URL"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp ISO da última alteração"
+        }
+      },
+      "required": ["code", "name", "uf"]
     }
   },
   "firestore": {
@@ -50,6 +95,10 @@
     "/settings/app_config": {
       "schema": "AppConfig",
       "description": "Configurações compartilhadas da lotérica"
+    },
+    "/lotteries/{lotteryId}": {
+      "schema": "LotteryClient",
+      "description": "Cadastro individual de cada lotérica por código da Caixa"
     }
   }
 }
