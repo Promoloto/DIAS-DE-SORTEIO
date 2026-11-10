@@ -133,17 +133,25 @@
 
     <!-- 2. CABEÇALHO LIMPO (PURAMENTE VISUAL) -->
     <header class="bg-white text-slate-900 shadow-sm border-b-2 border-slate-200">
-        <div class="max-w-7xl xl:max-w-[98vw] 2xl:max-w-[1880px] mx-auto px-4 py-3 sm:py-3.5 xl:py-2.5 flex items-center justify-center sm:justify-start gap-3 sm:gap-4">
-            <!-- Logotipo Trevo Caixa Oficial ou Personalizado (Visual) -->
-            <div class="shrink-0 flex items-center justify-center" aria-hidden="true">
-                <div id="header-logo-container" class="w-11 h-11 flex items-center justify-center">
-                    <!-- Injetado dinamicamente via updateAllLogos() -->
+        <div class="max-w-7xl xl:max-w-[98vw] 2xl:max-w-[1880px] mx-auto px-4 py-3 sm:py-3.5 xl:py-2.5 flex items-center justify-between gap-3 sm:gap-4 flex-wrap">
+            <!-- Lado Esquerdo: Trevo + Nome da Lotérica -->
+            <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <!-- Logotipo Trevo Caixa Oficial ou Personalizado (Visual) -->
+                <div class="shrink-0 flex items-center justify-center" aria-hidden="true">
+                    <div id="header-logo-container" class="w-11 h-11 flex items-center justify-center">
+                        <!-- Injetado dinamicamente via updateAllLogos() -->
+                    </div>
                 </div>
+                <!-- Nome da Lotérica em destaque -->
+                <h1 class="text-2xl sm:text-3xl font-black text-caixa-blue tracking-tight truncate" id="header-lottery-name">
+                    Lotérica Pé Quente
+                </h1>
             </div>
-            <!-- Nome da Lotérica em destaque -->
-            <h1 class="text-2xl sm:text-3xl font-black text-caixa-blue tracking-tight truncate" id="header-lottery-name">
-                Lotérica Pé Quente
-            </h1>
+
+            <!-- Lado Direito: WhatsApp, Instagram e Facebook (caso preenchidos no admin) -->
+            <div id="header-contacts-container" class="hidden flex items-center gap-2 sm:gap-3 flex-wrap justify-center sm:justify-end">
+                <!-- Injetado dinamicamente via renderHeaderContacts() -->
+            </div>
         </div>
     </header>
 
@@ -174,7 +182,7 @@
                 <div class="bg-caixa-blue text-white rounded-3xl xl:rounded-2xl p-4 sm:p-6 xl:p-3 2xl:p-4 shadow-2xl border-4 border-blue-900 w-full">
                     <div class="text-center mb-5 xl:mb-2.5">
                         <h2 class="text-3xl sm:text-4xl xl:text-2xl 2xl:text-3xl font-black text-orange-400 tracking-wide">
-                            DIA DOS JOGOS
+                            DIAS DE SORTEIO
                         </h2>
 
                         <!-- Atalhos de navegação rápida de dias para celular (oculto no desktop já que todas as colunas são visíveis) -->
@@ -432,6 +440,85 @@
                             </div>
                         </div>
 
+                        <!-- Campo 3: Redes Sociais, Contatos e Endereço -->
+                        <div class="space-y-4 pt-3 border-t-2 border-slate-100">
+                            <div>
+                                <label class="block text-lg font-black text-slate-800 mb-0.5">
+                                    Contatos, Redes Sociais e Endereço:
+                                </label>
+                                <p class="text-xs sm:text-sm text-slate-500">
+                                    Campos opcionais. Os contatos preenchidos aparecerão no cabeçalho e o endereço será exibido no rodapé da página.
+                                </p>
+                            </div>
+
+                            <!-- WhatsApp -->
+                            <div>
+                                <label for="input-lottery-whatsapp" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                                    <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
+                                    <span>Número do WhatsApp:</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="text" id="input-lottery-whatsapp"
+                                        class="w-full p-3.5 pl-11 rounded-xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-sm sm:text-base font-bold text-slate-800 transition"
+                                        placeholder="(11) 99999-9999">
+                                    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">
+                                        <i class="fa-brands fa-whatsapp text-emerald-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Instagram -->
+                            <div>
+                                <label for="input-lottery-instagram" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                                    <i class="fa-brands fa-instagram text-pink-600 text-base"></i>
+                                    <span>Instagram:</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="text" id="input-lottery-instagram"
+                                        class="w-full p-3.5 pl-11 rounded-xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-sm sm:text-base font-bold text-slate-800 transition"
+                                        placeholder="@minhaloterica ou instagram.com/minhaloterica">
+                                    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">
+                                        <i class="fa-brands fa-instagram text-pink-500"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Facebook -->
+                            <div>
+                                <label for="input-lottery-facebook" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                                    <i class="fa-brands fa-facebook text-blue-600 text-base"></i>
+                                    <span>Facebook:</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="text" id="input-lottery-facebook"
+                                        class="w-full p-3.5 pl-11 rounded-xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-sm sm:text-base font-bold text-slate-800 transition"
+                                        placeholder="facebook.com/minhaloterica ou Nome da Página">
+                                    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">
+                                        <i class="fa-brands fa-facebook text-blue-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Endereço -->
+                            <div>
+                                <label for="input-lottery-address" class="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-location-dot text-caixa-orange text-base"></i>
+                                    <span>Endereço da Lotérica:</span>
+                                </label>
+                                <div class="relative">
+                                    <input type="text" id="input-lottery-address"
+                                        class="w-full p-3.5 pl-11 rounded-xl border-2 border-slate-300 focus:border-caixa-blue focus:ring-4 focus:ring-blue-100 text-sm sm:text-base font-bold text-slate-800 transition"
+                                        placeholder="Rua / Av., Número - Bairro, Cidade - UF">
+                                    <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base pointer-events-none">
+                                        <i class="fa-solid fa-location-dot text-caixa-orange"></i>
+                                    </div>
+                                </div>
+                                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">
+                                    Exibido no rodapé da página inicial, entre a caixa de jogos e "By PROMOLOTO".
+                                </p>
+                            </div>
+                        </div>
+
                         <!-- Botão Salvar -->
                         <button type="submit"
                             class="btn-large w-full bg-caixa-blue hover:bg-blue-900 text-white font-black text-xl py-4 rounded-2xl shadow-xl transition transform hover:scale-[1.01] flex items-center justify-center gap-3 focus:ring-4 focus:ring-blue-300 cursor-pointer">
@@ -662,8 +749,16 @@
         <span class="font-bold text-sm sm:text-base" id="toast-message">Operação realizada com sucesso!</span>
     </div>
 
-    <!-- 4. RODAPÉ MINIMALISTA: APENAS O LINK "By PROMOLOTO" (3 CLIQUES PARA DESBLOQUEAR O PAINEL) -->
-    <footer class="py-6 mt-8 text-center border-t border-slate-200">
+    <!-- 4. RODAPÉ: ENDEREÇO (SE PREENCHIDO) E O LINK "By PROMOLOTO" (3 CLIQUES PARA DESBLOQUEAR O PAINEL) -->
+    <footer class="py-5 mt-6 xl:mt-3 text-center border-t border-slate-200">
+        <!-- Endereço (caso preenchido no painel administrativo) -->
+        <div id="footer-address-container" class="hidden mb-3 max-w-4xl mx-auto px-4">
+            <div class="inline-flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base font-bold text-slate-700 bg-slate-100 hover:bg-slate-200/80 px-4 py-2 rounded-2xl border border-slate-300 transition shadow-xs">
+                <i class="fa-solid fa-location-dot text-caixa-orange text-sm sm:text-base shrink-0"></i>
+                <span id="footer-address-text"></span>
+            </div>
+        </div>
+
         <button type="button" id="btn-promoloto" onclick="handlePromolotoClick(event)"
             class="text-xs font-black tracking-widest text-slate-400 hover:text-slate-700 transition uppercase cursor-pointer py-2 px-4 rounded-xl focus:outline-none"
             title="By PROMOLOTO">
@@ -744,6 +839,18 @@
                 }
                 if (config.customLogoData !== undefined) {
                     payload.customLogoData = String(config.customLogoData || "");
+                }
+                if (config.contactWhatsApp !== undefined) {
+                    payload.contactWhatsApp = String(config.contactWhatsApp || "");
+                }
+                if (config.contactInstagram !== undefined) {
+                    payload.contactInstagram = String(config.contactInstagram || "");
+                }
+                if (config.contactFacebook !== undefined) {
+                    payload.contactFacebook = String(config.contactFacebook || "");
+                }
+                if (config.contactAddress !== undefined) {
+                    payload.contactAddress = String(config.contactAddress || "");
                 }
                 if (config.scheduleData && typeof config.scheduleData === 'object') {
                     const cleanSchedule = {};
@@ -1038,10 +1145,18 @@
         let currentName = localStorage.getItem('caixa_bolao_name') || "Lotérica Pé Quente";
         let currentQRColor = "#000000"; // Padrão automático: CMYK 100, 100, 100, 100% (Preto Puro para CorelDRAW)
         let customLogoData = localStorage.getItem('caixa_custom_logo') || "";
+        let currentWhatsApp = localStorage.getItem('caixa_contact_whatsapp') || "";
+        let currentInstagram = localStorage.getItem('caixa_contact_instagram') || "";
+        let currentFacebook = localStorage.getItem('caixa_contact_facebook') || "";
+        let currentAddress = localStorage.getItem('caixa_contact_address') || "";
         let generatedSvgString = "";
         window.currentCode = currentCode;
         window.currentName = currentName;
         window.customLogoData = customLogoData;
+        window.currentWhatsApp = currentWhatsApp;
+        window.currentInstagram = currentInstagram;
+        window.currentFacebook = currentFacebook;
+        window.currentAddress = currentAddress;
         window.logoExplicitlyReset = false;
 
         // Logotipos personalizados de cada jogo (armazenados em base64 PNG no localStorage e sincronizados no Firebase Firestore)
@@ -1057,6 +1172,99 @@
         }
         window.CUSTOM_GAME_LOGOS = CUSTOM_GAME_LOGOS;
         let currentGameForLogoUpload = null;
+
+        // Funções para renderizar contatos no cabeçalho e endereço no rodapé
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderHeaderContacts() {
+            const container = document.getElementById('header-contacts-container');
+            if (!container) return;
+
+            const items = [];
+
+            // 1. WhatsApp
+            if (currentWhatsApp && currentWhatsApp.trim()) {
+                const raw = currentWhatsApp.trim();
+                let digits = raw.replace(/\D/g, '');
+                if (digits.length >= 8 && digits.length <= 11 && !digits.startsWith('55')) {
+                    digits = '55' + digits;
+                }
+                const waUrl = digits ? `https://wa.me/${digits}` : '#';
+                items.push(`
+                    <a href="${waUrl}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs sm:text-sm font-black shadow-xs transition hover:scale-105 active:scale-95 group"
+                        title="Falar no WhatsApp: ${escapeHtml(raw)}">
+                        <i class="fa-brands fa-whatsapp text-emerald-600 text-base sm:text-lg group-hover:scale-110 transition-transform"></i>
+                        <span class="tracking-tight">${escapeHtml(raw)}</span>
+                    </a>
+                `);
+            }
+
+            // 2. Instagram
+            if (currentInstagram && currentInstagram.trim()) {
+                const raw = currentInstagram.trim();
+                const clean = raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/^instagram\.com\//i, '').replace(/^@/, '');
+                const igUrl = `https://instagram.com/${clean}`;
+                const display = raw.startsWith('@') ? raw : (raw.includes('/') ? ('@' + clean) : ('@' + raw));
+                items.push(`
+                    <a href="${igUrl}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-50 via-purple-50 to-orange-50 hover:from-pink-100 hover:to-orange-100 text-purple-950 border border-pink-200 rounded-xl text-xs sm:text-sm font-black shadow-xs transition hover:scale-105 active:scale-95 group"
+                        title="Ver Instagram: ${escapeHtml(display)}">
+                        <i class="fa-brands fa-instagram text-pink-600 text-base sm:text-lg group-hover:scale-110 transition-transform"></i>
+                        <span class="tracking-tight">${escapeHtml(display)}</span>
+                    </a>
+                `);
+            }
+
+            // 3. Facebook
+            if (currentFacebook && currentFacebook.trim()) {
+                const raw = currentFacebook.trim();
+                let fbUrl = raw;
+                if (!fbUrl.startsWith('http://') && !fbUrl.startsWith('https://')) {
+                    const clean = raw.replace(/^facebook\.com\//i, '');
+                    fbUrl = `https://facebook.com/${clean}`;
+                }
+                const display = raw.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/^facebook\.com\//i, '');
+                items.push(`
+                    <a href="${fbUrl}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 rounded-xl text-xs sm:text-sm font-black shadow-xs transition hover:scale-105 active:scale-95 group"
+                        title="Acessar Facebook: ${escapeHtml(display || raw)}">
+                        <i class="fa-brands fa-facebook text-blue-600 text-base sm:text-lg group-hover:scale-110 transition-transform"></i>
+                        <span class="tracking-tight truncate max-w-[130px] sm:max-w-[200px]">${escapeHtml(display || raw)}</span>
+                    </a>
+                `);
+            }
+
+            if (items.length > 0) {
+                container.innerHTML = items.join('');
+                container.classList.remove('hidden');
+            } else {
+                container.innerHTML = '';
+                container.classList.add('hidden');
+            }
+        }
+
+        function renderFooterAddress() {
+            const container = document.getElementById('footer-address-container');
+            const textEl = document.getElementById('footer-address-text');
+            if (!container || !textEl) return;
+
+            if (currentAddress && currentAddress.trim()) {
+                textEl.innerText = currentAddress.trim();
+                container.classList.remove('hidden');
+            } else {
+                textEl.innerText = "";
+                container.classList.add('hidden');
+            }
+        }
 
         // Callback invocado quando logos chegam da nuvem (Firestore) - Garante exibição em modo anônimo e para todos
         window.onCloudLogosReceived = function(cloudLogos) {
@@ -1135,6 +1343,38 @@
                     updateAllLogos();
                 }
             }
+            if (cfg.contactWhatsApp !== undefined && cfg.contactWhatsApp !== currentWhatsApp) {
+                currentWhatsApp = String(cfg.contactWhatsApp || "");
+                window.currentWhatsApp = currentWhatsApp;
+                try { localStorage.setItem('caixa_contact_whatsapp', currentWhatsApp); } catch(e){}
+                const waInput = document.getElementById('input-lottery-whatsapp');
+                if (waInput && document.activeElement !== waInput) waInput.value = currentWhatsApp;
+                renderHeaderContacts();
+            }
+            if (cfg.contactInstagram !== undefined && cfg.contactInstagram !== currentInstagram) {
+                currentInstagram = String(cfg.contactInstagram || "");
+                window.currentInstagram = currentInstagram;
+                try { localStorage.setItem('caixa_contact_instagram', currentInstagram); } catch(e){}
+                const igInput = document.getElementById('input-lottery-instagram');
+                if (igInput && document.activeElement !== igInput) igInput.value = currentInstagram;
+                renderHeaderContacts();
+            }
+            if (cfg.contactFacebook !== undefined && cfg.contactFacebook !== currentFacebook) {
+                currentFacebook = String(cfg.contactFacebook || "");
+                window.currentFacebook = currentFacebook;
+                try { localStorage.setItem('caixa_contact_facebook', currentFacebook); } catch(e){}
+                const fbInput = document.getElementById('input-lottery-facebook');
+                if (fbInput && document.activeElement !== fbInput) fbInput.value = currentFacebook;
+                renderHeaderContacts();
+            }
+            if (cfg.contactAddress !== undefined && cfg.contactAddress !== currentAddress) {
+                currentAddress = String(cfg.contactAddress || "");
+                window.currentAddress = currentAddress;
+                try { localStorage.setItem('caixa_contact_address', currentAddress); } catch(e){}
+                const addrInput = document.getElementById('input-lottery-address');
+                if (addrInput && document.activeElement !== addrInput) addrInput.value = currentAddress;
+                renderFooterAddress();
+            }
             if (cfg.scheduleData && typeof cfg.scheduleData === 'object') {
                 const clean = {};
                 ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].forEach(d => {
@@ -1167,7 +1407,11 @@
                 const configPayload = {
                     lotteryCode: currentCode,
                     lotteryName: currentName,
-                    scheduleData: SCHEDULE_DATA
+                    scheduleData: SCHEDULE_DATA,
+                    contactWhatsApp: currentWhatsApp,
+                    contactInstagram: currentInstagram,
+                    contactFacebook: currentFacebook,
+                    contactAddress: currentAddress
                 };
                 if (customLogoData) {
                     configPayload.customLogoData = customLogoData;
@@ -1213,9 +1457,19 @@
             if (codeInputEl) codeInputEl.value = currentCode;
             const nameInputEl = document.getElementById('input-lottery-name');
             if (nameInputEl) nameInputEl.value = currentName;
+            const waInputEl = document.getElementById('input-lottery-whatsapp');
+            if (waInputEl) waInputEl.value = currentWhatsApp;
+            const igInputEl = document.getElementById('input-lottery-instagram');
+            if (igInputEl) igInputEl.value = currentInstagram;
+            const fbInputEl = document.getElementById('input-lottery-facebook');
+            if (fbInputEl) fbInputEl.value = currentFacebook;
+            const addrInputEl = document.getElementById('input-lottery-address');
+            if (addrInputEl) addrInputEl.value = currentAddress;
 
             // Renderizar componentes
             updateAllLogos();
+            renderHeaderContacts();
+            renderFooterAddress();
             renderTableGrid();
             renderGamesFilterButtons();
             highlightCurrentDayOfWeek();
@@ -2088,10 +2342,18 @@
         function applyAdminChanges(showToastNotification = true, persistToCloud = true) {
             const codeInput = document.getElementById('input-lottery-code');
             const nameInput = document.getElementById('input-lottery-name');
+            const waInput = document.getElementById('input-lottery-whatsapp');
+            const igInput = document.getElementById('input-lottery-instagram');
+            const fbInput = document.getElementById('input-lottery-facebook');
+            const addrInput = document.getElementById('input-lottery-address');
 
             const rawVal = codeInput ? codeInput.value.trim() : "";
             currentCode = extractCode(rawVal);
             currentName = (nameInput && nameInput.value.trim()) || "Lotérica Pé Quente";
+            currentWhatsApp = waInput ? waInput.value.trim() : "";
+            currentInstagram = igInput ? igInput.value.trim() : "";
+            currentFacebook = fbInput ? fbInput.value.trim() : "";
+            currentAddress = addrInput ? addrInput.value.trim() : "";
             currentQRColor = "#000000"; // CMYK 100, 100, 100, 100% (Preto Puro)
 
             // URL fixa oficial da Caixa com os 4 dígitos finais
@@ -2105,12 +2367,20 @@
             window.currentCode = currentCode;
             window.currentName = currentName;
             window.customLogoData = customLogoData;
+            window.currentWhatsApp = currentWhatsApp;
+            window.currentInstagram = currentInstagram;
+            window.currentFacebook = currentFacebook;
+            window.currentAddress = currentAddress;
 
             // Persistir localmente no navegador
             try {
                 localStorage.setItem('caixa_bolao_link', currentLink);
                 localStorage.setItem('caixa_bolao_code', currentCode);
                 localStorage.setItem('caixa_bolao_name', currentName);
+                localStorage.setItem('caixa_contact_whatsapp', currentWhatsApp);
+                localStorage.setItem('caixa_contact_instagram', currentInstagram);
+                localStorage.setItem('caixa_contact_facebook', currentFacebook);
+                localStorage.setItem('caixa_contact_address', currentAddress);
                 localStorage.setItem('caixa_bolao_qrcolor', "#000000");
             } catch (e) {}
 
@@ -2124,6 +2394,10 @@
             const detectedBadgeEl = document.getElementById('detected-code-badge');
             if (detectedBadgeEl) detectedBadgeEl.innerText = currentCode;
 
+            // Atualizar contatos no cabeçalho e endereço no rodapé
+            renderHeaderContacts();
+            renderFooterAddress();
+
             // Gerar novo QR Code em SVG transparente
             generateQrSvg();
 
@@ -2136,7 +2410,11 @@
                 const payload = {
                     lotteryCode: currentCode,
                     lotteryName: currentName,
-                    scheduleData: SCHEDULE_DATA
+                    scheduleData: SCHEDULE_DATA,
+                    contactWhatsApp: currentWhatsApp,
+                    contactInstagram: currentInstagram,
+                    contactFacebook: currentFacebook,
+                    contactAddress: currentAddress
                 };
                 if (customLogoData) {
                     payload.customLogoData = customLogoData;
