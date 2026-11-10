@@ -704,37 +704,25 @@
         }
         testConnection();
 
-        // Salvar logos na nuvem Firestore com merge para não perder os outros jogos
+        // Salvar logos na nuvem Firestore de forma limpa e otimizada (sem estourar limite de 1MB)
         window.saveLogosToCloud = async function(logos) {
             try {
+                const clean = {};
+                for (const [k, v] of Object.entries(logos || {})) {
+                    if (v && typeof v === 'string' && v.length > 300) {
+                        clean[k] = v;
+                    }
+                }
                 await setDoc(doc(db, "settings", "game_logos"), {
-                    logos: logos,
+                    logos: clean,
                     updatedAt: new Date().toISOString()
-                }, { merge: true });
-                console.log("[Firebase] Logos salvos com sucesso no Firestore!");
+                });
+                console.log("[Firebase] Logos salvos com sucesso no Firestore! Total:", Object.keys(clean).length);
                 if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
                 return true;
             } catch (err) {
                 console.error("[Firebase] Erro ao salvar logos no Firestore:", err);
                 if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(false, "Erro ao salvar na nuvem: " + (err && err.message ? err.message : ''));
-                return false;
-            }
-        };
-
-        // Salvar logo individual de um jogo específico (rápido e sem conflitos)
-        window.saveSingleGameLogoToCloud = async function(gameName, base64Png) {
-            try {
-                await setDoc(doc(db, "settings", "game_logos"), {
-                    logos: {
-                        [gameName]: base64Png
-                    },
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
-                console.log(`[Firebase] Logo de ${gameName} salvo com sucesso no Firestore!`);
-                if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
-                return true;
-            } catch (err) {
-                console.error(`[Firebase] Erro ao salvar logo de ${gameName}:`, err);
                 return false;
             }
         };
@@ -758,17 +746,13 @@
         onSnapshot(doc(db, "settings", "game_logos"), (snap) => {
             if (snap.exists()) {
                 const data = snap.data();
-                const cloudLogos = (data && data.logos && typeof data.logos === 'object') ? Object.assign({}, data.logos) : {};
+                const rawLogos = (data && data.logos && typeof data.logos === 'object') ? data.logos : {};
+                const cloudLogos = {};
                 
-                // Sincronização Inteligente: Se este navegador já tinha logotipos no localStorage
-                // (como os que o usuário já fez upload de outros jogos), mesclamos para a nuvem não sobrescrever com vazio
-                let needsCloudBackfill = false;
-                if (window.CUSTOM_GAME_LOGOS && typeof window.CUSTOM_GAME_LOGOS === 'object') {
-                    for (const [game, localLogo] of Object.entries(window.CUSTOM_GAME_LOGOS)) {
-                        if (localLogo && typeof localLogo === 'string' && localLogo.startsWith('data:image/') && !cloudLogos[game]) {
-                            cloudLogos[game] = localLogo;
-                            needsCloudBackfill = true;
-                        }
+                // Descartar qualquer dummy corrompido menor que 300 caracteres
+                for (const [k, v] of Object.entries(rawLogos)) {
+                    if (v && typeof v === 'string' && v.length > 300) {
+                        cloudLogos[k] = v;
                     }
                 }
 
@@ -777,18 +761,6 @@
                     window.onCloudLogosReceived(cloudLogos);
                 }
                 if (window.updateCloudSyncBadge) window.updateCloudSyncBadge(true);
-
-                // Se o navegador tinha logos locais que faltavam na nuvem, sobe tudo agora para que o modo anônimo também veja!
-                if (needsCloudBackfill) {
-                    console.log("[Firebase] Enviando logos locais previamente salvos para preencher a nuvem global...");
-                    window.saveLogosToCloud(cloudLogos);
-                }
-            } else {
-                // Se a nuvem estiver vazia, mas o navegador atual tiver logos locais, sobe para o Firestore
-                if (window.CUSTOM_GAME_LOGOS && Object.keys(window.CUSTOM_GAME_LOGOS).length > 0) {
-                    console.log("[Firebase] Nuvem vazia, enviando logos locais salvos...");
-                    window.saveLogosToCloud(window.CUSTOM_GAME_LOGOS);
-                }
             }
         }, (error) => {
             console.warn("[Firebase] Aviso na sincronização de logos:", error);
@@ -1065,8 +1037,8 @@
         // Callback invocado quando logos chegam da nuvem (Firestore) - Garante exibição em modo anônimo e para todos
         window.onCloudLogosReceived = function(cloudLogos) {
             if (!cloudLogos || typeof cloudLogos !== 'object') return;
-            console.log("[App] Aplicando logos recebidos da nuvem:", Object.keys(cloudLogos).length);
-            CUSTOM_GAME_LOGOS = Object.assign({}, CUSTOM_GAME_LOGOS, cloudLogos);
+            // Espelhar com fidelidade os dados oficiais da nuvem
+            CUSTOM_GAME_LOGOS = Object.assign({}, cloudLogos);
             window.CUSTOM_GAME_LOGOS = CUSTOM_GAME_LOGOS;
             try {
                 localStorage.setItem('caixa_game_logos', JSON.stringify(CUSTOM_GAME_LOGOS));
@@ -1669,7 +1641,8 @@
                 const dataUrl = e.target.result;
                 const img = new Image();
                 img.onload = function() {
-                    const maxDim = 240;
+                    // Dimensão máxima de 96px: qualidade cristalina para botões de 48px (~20KB por jogo, permitindo todos os jogos sem estourar o limite de 1MB)
+                    const maxDim = 96;
                     let w = img.width;
                     let h = img.height;
                     if (w > maxDim || h > maxDim) {
@@ -1685,6 +1658,8 @@
                     canvas.width = w;
                     canvas.height = h;
                     const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, 0, 0, w, h);
                     const optimizedPng = canvas.toDataURL('image/png');
 
