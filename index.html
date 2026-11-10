@@ -730,11 +730,31 @@
         // Salvar configurações gerais na nuvem Firestore
         window.saveConfigToCloud = async function(config) {
             try {
-                await setDoc(doc(db, "settings", "app_config"), {
-                    ...config,
+                if (!config || typeof config !== 'object') return false;
+
+                const payload = {
                     updatedAt: new Date().toISOString()
-                }, { merge: true });
-                console.log("[Firebase] Configurações salvas no Firestore!");
+                };
+
+                if (config.lotteryCode !== undefined) {
+                    payload.lotteryCode = String(config.lotteryCode || (typeof currentCode !== 'undefined' ? currentCode : "4832"));
+                }
+                if (config.lotteryName !== undefined) {
+                    payload.lotteryName = String(config.lotteryName || (typeof currentName !== 'undefined' ? currentName : "Lotérica Pé Quente"));
+                }
+                if (config.customLogoData !== undefined) {
+                    payload.customLogoData = String(config.customLogoData || "");
+                }
+                if (config.scheduleData && typeof config.scheduleData === 'object') {
+                    const cleanSchedule = {};
+                    ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].forEach(d => {
+                        cleanSchedule[d] = Array.isArray(config.scheduleData[d]) ? config.scheduleData[d] : [];
+                    });
+                    payload.scheduleData = cleanSchedule;
+                }
+
+                await setDoc(doc(db, "settings", "app_config"), payload, { merge: true });
+                console.log("[Firebase] Configurações salvas no Firestore!", Object.keys(payload));
                 return true;
             } catch (err) {
                 console.error("[Firebase] Erro ao salvar config no Firestore:", err);
@@ -1019,6 +1039,10 @@
         let currentQRColor = "#000000"; // Padrão automático: CMYK 100, 100, 100, 100% (Preto Puro para CorelDRAW)
         let customLogoData = localStorage.getItem('caixa_custom_logo') || "";
         let generatedSvgString = "";
+        window.currentCode = currentCode;
+        window.currentName = currentName;
+        window.customLogoData = customLogoData;
+        window.logoExplicitlyReset = false;
 
         // Logotipos personalizados de cada jogo (armazenados em base64 PNG no localStorage e sincronizados no Firebase Firestore)
         let CUSTOM_GAME_LOGOS = {};
@@ -1061,14 +1085,17 @@
 
         // Callback invocado quando configurações da lotérica chegam da nuvem
         window.onCloudConfigReceived = function(cfg) {
-            if (!cfg) return;
+            if (!cfg || typeof cfg !== 'object') return;
             console.log("[App] Configurações recebidas da nuvem:", cfg);
             let changesMade = false;
             if (cfg.lotteryCode && cfg.lotteryCode !== currentCode) {
-                currentCode = cfg.lotteryCode;
+                currentCode = String(cfg.lotteryCode);
+                window.currentCode = currentCode;
                 currentLink = `https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/${currentCode}`;
-                localStorage.setItem('caixa_bolao_code', currentCode);
-                localStorage.setItem('caixa_bolao_link', currentLink);
+                try {
+                    localStorage.setItem('caixa_bolao_code', currentCode);
+                    localStorage.setItem('caixa_bolao_link', currentLink);
+                } catch (e) {}
                 const codeInput = document.getElementById('input-lottery-code');
                 if (codeInput && document.activeElement !== codeInput) codeInput.value = currentCode;
                 const previewCodeEl = document.getElementById('preview-lottery-code');
@@ -1078,8 +1105,11 @@
                 changesMade = true;
             }
             if (cfg.lotteryName && cfg.lotteryName !== currentName) {
-                currentName = cfg.lotteryName;
-                localStorage.setItem('caixa_bolao_name', currentName);
+                currentName = String(cfg.lotteryName);
+                window.currentName = currentName;
+                try {
+                    localStorage.setItem('caixa_bolao_name', currentName);
+                } catch (e) {}
                 const nameInput = document.getElementById('input-lottery-name');
                 if (nameInput && document.activeElement !== nameInput) nameInput.value = currentName;
                 const headerNameEl = document.getElementById('header-lottery-name');
@@ -1088,18 +1118,32 @@
                 if (previewNameEl) previewNameEl.innerText = currentName;
                 changesMade = true;
             }
-            if (cfg.customLogoData !== undefined && cfg.customLogoData !== customLogoData) {
-                customLogoData = cfg.customLogoData;
-                if (customLogoData) {
-                    localStorage.setItem('caixa_custom_logo', customLogoData);
-                } else {
-                    localStorage.removeItem('caixa_custom_logo');
+            if (cfg.customLogoData !== undefined) {
+                const cloudLogo = String(cfg.customLogoData || "");
+                if (cloudLogo !== customLogoData) {
+                    customLogoData = cloudLogo;
+                    window.customLogoData = cloudLogo;
+                    try {
+                        if (customLogoData) {
+                            localStorage.setItem('caixa_custom_logo', customLogoData);
+                        } else {
+                            localStorage.removeItem('caixa_custom_logo');
+                        }
+                    } catch (e) {
+                        console.warn("[App] Aviso de localStorage ao gravar logo:", e);
+                    }
+                    updateAllLogos();
                 }
-                updateAllLogos();
             }
             if (cfg.scheduleData && typeof cfg.scheduleData === 'object') {
-                SCHEDULE_DATA = cfg.scheduleData;
-                localStorage.setItem('caixa_schedule_data', JSON.stringify(SCHEDULE_DATA));
+                const clean = {};
+                ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].forEach(d => {
+                    clean[d] = Array.isArray(cfg.scheduleData[d]) ? cfg.scheduleData[d] : (DEFAULT_SCHEDULE_DATA[d] || []);
+                });
+                SCHEDULE_DATA = clean;
+                try {
+                    localStorage.setItem('caixa_schedule_data', JSON.stringify(SCHEDULE_DATA));
+                } catch (e) {}
                 rebuildGameDaysMap();
                 renderTableGrid();
                 renderGamesFilterButtons();
@@ -1120,12 +1164,17 @@
                 if (!res) success = false;
             }
             if (window.saveConfigToCloud) {
-                const res2 = await window.saveConfigToCloud({
+                const configPayload = {
                     lotteryCode: currentCode,
                     lotteryName: currentName,
-                    customLogoData: customLogoData,
                     scheduleData: SCHEDULE_DATA
-                });
+                };
+                if (customLogoData) {
+                    configPayload.customLogoData = customLogoData;
+                } else if (window.logoExplicitlyReset) {
+                    configPayload.customLogoData = "";
+                }
+                const res2 = await window.saveConfigToCloud(configPayload);
                 if (!res2) success = false;
             }
             if (success) {
@@ -1170,7 +1219,7 @@
             renderTableGrid();
             renderGamesFilterButtons();
             highlightCurrentDayOfWeek();
-            applyAdminChanges(false);
+            applyAdminChanges(false, false); // Não salvar na nuvem ao carregar a página inicial
 
             // Escutar digitação ao vivo no código de 4 dígitos da lotérica
             if (codeInputEl) {
@@ -1236,43 +1285,113 @@
             const file = event.target.files && event.target.files[0];
             if (!file) return;
 
+            const isSvg = file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg');
+            const isImage = file.type.startsWith('image/') || isSvg;
+
+            if (!isImage) {
+                showToast('Por favor, selecione um arquivo de imagem válido (PNG, SVG, JPG, WebP).', 'bg-rose-600 text-white');
+                event.target.value = '';
+                return;
+            }
+
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const result = e.target.result;
-                customLogoData = result;
-                try {
-                    localStorage.setItem('caixa_custom_logo', result);
-                } catch (err) {
-                    console.warn("Storage quota exceeded", err);
-                }
-                updateAllLogos();
-                if (window.saveConfigToCloud) {
-                    window.saveConfigToCloud({
-                        lotteryCode: currentCode,
-                        lotteryName: currentName,
-                        customLogoData: customLogoData,
-                        scheduleData: SCHEDULE_DATA
-                    });
-                }
-                showToast("Logotipo atualizado e salvo na nuvem com sucesso!");
-            };
-            reader.readAsDataURL(file);
+
+            if (isSvg) {
+                // Para arquivos SVG: preservar como vetor puro (perfeito em qualquer resolução e super leve)
+                reader.onload = function(e) {
+                    const svgDataUrl = e.target.result;
+                    applyAndSaveNewMainLogo(svgDataUrl);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // Para imagens raster (PNG, JPG, WebP): otimizar via canvas para resolução máxima de 256px
+                reader.onload = function(e) {
+                    const dataUrl = e.target.result;
+                    const img = new Image();
+                    img.onload = function() {
+                        try {
+                            const maxDim = 256;
+                            let w = img.width || maxDim;
+                            let h = img.height || maxDim;
+                            if (w > maxDim || h > maxDim) {
+                                if (w > h) {
+                                    h = Math.round((h * maxDim) / w);
+                                    w = maxDim;
+                                } else {
+                                    w = Math.round((w * maxDim) / h);
+                                    h = maxDim;
+                                }
+                            }
+                            const canvas = document.createElement('canvas');
+                            canvas.width = Math.max(1, w);
+                            canvas.height = Math.max(1, h);
+                            const ctx = canvas.getContext('2d');
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            const optimizedPng = canvas.toDataURL('image/png');
+                            applyAndSaveNewMainLogo(optimizedPng);
+                        } catch (err) {
+                            console.warn("Canvas resize fallback:", err);
+                            applyAndSaveNewMainLogo(dataUrl);
+                        }
+                    };
+                    img.onerror = function() {
+                        applyAndSaveNewMainLogo(dataUrl);
+                    };
+                    img.src = dataUrl;
+                };
+                reader.readAsDataURL(file);
+            }
             event.target.value = "";
+        }
+
+        function applyAndSaveNewMainLogo(logoDataUrl) {
+            if (!logoDataUrl || typeof logoDataUrl !== 'string') return;
+            customLogoData = logoDataUrl;
+            window.customLogoData = logoDataUrl;
+            window.logoExplicitlyReset = false;
+
+            try {
+                localStorage.setItem('caixa_custom_logo', customLogoData);
+            } catch (err) {
+                console.warn("Storage warning:", err);
+            }
+
+            updateAllLogos();
+
+            if (window.saveConfigToCloud) {
+                window.saveConfigToCloud({
+                    customLogoData: customLogoData
+                }).then(ok => {
+                    if (ok) {
+                        showToast("Logotipo oficial atualizado e salvo na nuvem com sucesso!");
+                    } else {
+                        showToast("Logotipo salvo localmente. Conectando à nuvem...", "bg-amber-600 text-white");
+                    }
+                });
+            } else {
+                showToast("Logotipo oficial atualizado com sucesso!");
+            }
         }
 
         function resetToDefaultLogo() {
             customLogoData = "";
-            localStorage.removeItem('caixa_custom_logo');
+            window.customLogoData = "";
+            window.logoExplicitlyReset = true;
+            try {
+                localStorage.removeItem('caixa_custom_logo');
+            } catch (e) {}
             updateAllLogos();
             if (window.saveConfigToCloud) {
                 window.saveConfigToCloud({
-                    lotteryCode: currentCode,
-                    lotteryName: currentName,
-                    customLogoData: "",
-                    scheduleData: SCHEDULE_DATA
+                    customLogoData: ""
+                }).then(ok => {
+                    showToast("Logotipo padrão da Caixa restaurado!");
                 });
+            } else {
+                showToast("Logotipo padrão da Caixa restaurado!");
             }
-            showToast("Logotipo padrão da Caixa restaurado!");
         }
 
         function updateAllLogos() {
@@ -1282,10 +1401,26 @@
             const resetBtn = document.getElementById('btn-reset-logo');
 
             if (customLogoData) {
-                const imgHtml = `<img src="${customLogoData}" alt="Logotipo Atualizado" class="w-full h-full object-contain" />`;
-                if (headerContainer) headerContainer.innerHTML = imgHtml;
-                if (plaqueContainer) plaqueContainer.innerHTML = imgHtml;
-                if (adminPreviewContainer) adminPreviewContainer.innerHTML = imgHtml;
+                const createLogoImg = () => {
+                    const img = document.createElement('img');
+                    img.src = customLogoData;
+                    img.alt = "Logotipo Atualizado";
+                    img.className = "w-full h-full object-contain";
+                    return img;
+                };
+
+                if (headerContainer) {
+                    headerContainer.innerHTML = "";
+                    headerContainer.appendChild(createLogoImg());
+                }
+                if (plaqueContainer) {
+                    plaqueContainer.innerHTML = "";
+                    plaqueContainer.appendChild(createLogoImg());
+                }
+                if (adminPreviewContainer) {
+                    adminPreviewContainer.innerHTML = "";
+                    adminPreviewContainer.appendChild(createLogoImg());
+                }
                 if (resetBtn) resetBtn.classList.remove('hidden');
             } else {
                 if (headerContainer) headerContainer.innerHTML = DEFAULT_CAIXA_CLOVER_SVG;
@@ -1773,12 +1908,9 @@
             } catch (e) {
                 console.warn("Erro ao salvar dias de sorteio:", e);
             }
-            // Sincronizar dias de sorteio na nuvem
+            // Sincronizar dias de sorteio na nuvem sem sobrescrever o logotipo
             if (window.saveConfigToCloud) {
                 window.saveConfigToCloud({
-                    lotteryCode: currentCode,
-                    lotteryName: currentName,
-                    customLogoData: customLogoData,
                     scheduleData: SCHEDULE_DATA
                 });
             }
@@ -1953,7 +2085,7 @@
         }
 
         // --- 9. ATUALIZAÇÃO DOS DADOS ADMINISTRATIVOS ---
-        function applyAdminChanges(showToastNotification = true) {
+        function applyAdminChanges(showToastNotification = true, persistToCloud = true) {
             const codeInput = document.getElementById('input-lottery-code');
             const nameInput = document.getElementById('input-lottery-name');
 
@@ -1970,11 +2102,17 @@
                 codeInput.value = currentCode;
             }
 
+            window.currentCode = currentCode;
+            window.currentName = currentName;
+            window.customLogoData = customLogoData;
+
             // Persistir localmente no navegador
-            localStorage.setItem('caixa_bolao_link', currentLink);
-            localStorage.setItem('caixa_bolao_code', currentCode);
-            localStorage.setItem('caixa_bolao_name', currentName);
-            localStorage.setItem('caixa_bolao_qrcolor', "#000000");
+            try {
+                localStorage.setItem('caixa_bolao_link', currentLink);
+                localStorage.setItem('caixa_bolao_code', currentCode);
+                localStorage.setItem('caixa_bolao_name', currentName);
+                localStorage.setItem('caixa_bolao_qrcolor', "#000000");
+            } catch (e) {}
 
             // Atualizar UI
             const headerNameEl = document.getElementById('header-lottery-name');
@@ -1989,17 +2127,23 @@
             // Gerar novo QR Code em SVG transparente
             generateQrSvg();
 
-            // Atualizar links da tabela
+            // Atualizar links da tabela e todos os logos
             renderTableGrid();
+            updateAllLogos();
 
-            // Salvar configurações gerais na nuvem Firestore
-            if (window.saveConfigToCloud) {
-                window.saveConfigToCloud({
+            // Salvar configurações gerais na nuvem Firestore somente quando persistToCloud for true
+            if (persistToCloud && window.saveConfigToCloud) {
+                const payload = {
                     lotteryCode: currentCode,
                     lotteryName: currentName,
-                    customLogoData: customLogoData,
                     scheduleData: SCHEDULE_DATA
-                });
+                };
+                if (customLogoData) {
+                    payload.customLogoData = customLogoData;
+                } else if (window.logoExplicitlyReset) {
+                    payload.customLogoData = "";
+                }
+                window.saveConfigToCloud(payload);
             }
 
             if (showToastNotification) {
