@@ -142,14 +142,26 @@
                         <!-- Injetado dinamicamente via updateAllLogos() -->
                     </div>
                 </div>
-                <!-- Nome da Lotérica em destaque e UF -->
-                <div class="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
-                    <h1 class="text-2xl sm:text-3xl font-black text-caixa-blue tracking-tight truncate" id="header-lottery-name">
-                        Lotérica Pé Quente
-                    </h1>
-                    <span id="header-lottery-uf-badge" class="inline-flex items-center text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-lg bg-blue-100 text-caixa-blue border border-blue-300 uppercase shadow-xs">
-                        SP
-                    </span>
+                <!-- Nome da Lotérica em destaque, UF e endereço clicável -->
+                <div class="flex flex-col min-w-0">
+                    <div class="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
+                        <h1 class="text-2xl sm:text-3xl font-black text-caixa-blue tracking-tight truncate" id="header-lottery-name">
+                            Lotérica Pé Quente
+                        </h1>
+                        <span id="header-lottery-uf-badge" class="inline-flex items-center text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-lg bg-blue-100 text-caixa-blue border border-blue-300 uppercase shadow-xs">
+                            SP
+                        </span>
+                    </div>
+                    <!-- Atalho clicável de endereço no cabeçalho para rota no Google Maps -->
+                    <a id="header-address-link" href="#" target="_blank" rel="noopener noreferrer"
+                        class="hidden inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 hover:text-caixa-orange font-bold mt-1 transition group truncate max-w-xs sm:max-w-md lg:max-w-xl"
+                        title="Ver endereço e traçar rota no Google Maps">
+                        <i class="fa-solid fa-location-dot text-caixa-orange text-xs group-hover:scale-110 transition-transform shrink-0"></i>
+                        <span id="header-address-text" class="truncate font-semibold"></span>
+                        <span class="text-[10px] uppercase font-black tracking-wider text-caixa-blue bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 group-hover:bg-orange-50 group-hover:text-caixa-orange group-hover:border-orange-200 transition shrink-0">
+                            <i class="fa-solid fa-diamond-turn-right text-xs"></i> Rota
+                        </span>
+                    </a>
                 </div>
             </div>
 
@@ -319,6 +331,22 @@
                     </div>
 
                 </div>
+            </div>
+
+            <!-- Endereço da Lotérica em destaque (Posicionado mais acima, com link clicável e atalho de rota no Google Maps) -->
+            <div id="consultation-address-container" class="hidden mt-3 sm:mt-4 text-center max-w-4xl mx-auto px-2">
+                <a id="consultation-address-link" href="#" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm md:text-base font-bold text-slate-800 bg-white hover:bg-orange-50/80 hover:text-caixa-blue px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl border-2 border-slate-300 hover:border-caixa-orange shadow-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer group"
+                    title="Clique para traçar rota no Google Maps">
+                    <span class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-orange-100 text-caixa-orange group-hover:bg-orange-500 group-hover:text-white transition shrink-0">
+                        <i class="fa-solid fa-location-dot text-sm sm:text-base"></i>
+                    </span>
+                    <span id="consultation-address-text" class="font-bold text-slate-800 group-hover:text-caixa-blue"></span>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-black text-white bg-caixa-blue group-hover:bg-caixa-orange px-2.5 py-1 rounded-xl shadow-xs transition shrink-0">
+                        <i class="fa-solid fa-diamond-turn-right text-orange-300 group-hover:text-white"></i>
+                        <span>Traçar Rota no Maps</span>
+                    </span>
+                </a>
             </div>
 
         </section>
@@ -884,18 +912,10 @@
         <span class="font-bold text-sm sm:text-base" id="toast-message">Operação realizada com sucesso!</span>
     </div>
 
-    <!-- 4. RODAPÉ: ENDEREÇO (SE PREENCHIDO) E O LINK "By PROMOLOTO" (3 CLIQUES PARA DESBLOQUEAR O PAINEL) -->
-    <footer class="py-5 mt-6 xl:mt-3 text-center border-t border-slate-200">
-        <!-- Endereço (caso preenchido no painel administrativo) -->
-        <div id="footer-address-container" class="hidden mb-3 max-w-4xl mx-auto px-4">
-            <div class="inline-flex items-center justify-center gap-2 text-xs sm:text-sm md:text-base font-bold text-slate-700 bg-slate-100 hover:bg-slate-200/80 px-4 py-2 rounded-2xl border border-slate-300 transition shadow-xs">
-                <i class="fa-solid fa-location-dot text-caixa-orange text-sm sm:text-base shrink-0"></i>
-                <span id="footer-address-text"></span>
-            </div>
-        </div>
-
+    <!-- 4. RODAPÉ: O LINK "By PROMOLOTO" (3 CLIQUES PARA DESBLOQUEAR O PAINEL ADMINISTRATIVO) -->
+    <footer class="py-3 mt-2 text-center">
         <button type="button" id="btn-promoloto" onclick="handlePromolotoClick(event)"
-            class="text-xs font-black tracking-widest text-slate-400 hover:text-slate-700 transition uppercase cursor-pointer py-2 px-4 rounded-xl focus:outline-none"
+            class="text-xs font-black tracking-widest text-slate-400 hover:text-slate-700 transition uppercase cursor-pointer py-1.5 px-4 rounded-xl focus:outline-none"
             title="By PROMOLOTO">
             By PROMOLOTO
         </button>
@@ -1636,16 +1656,46 @@
         }
 
         function renderFooterAddress() {
-            const container = document.getElementById('footer-address-container');
-            const textEl = document.getElementById('footer-address-text');
-            if (!container || !textEl) return;
+            const cleanAddress = (currentAddress || '').trim();
 
-            if (currentAddress && currentAddress.trim()) {
-                textEl.innerText = currentAddress.trim();
-                container.classList.remove('hidden');
+            // 1. Atalho no Cabeçalho (abaixo do nome e UF da lotérica)
+            const headerLink = document.getElementById('header-address-link');
+            const headerText = document.getElementById('header-address-text');
+
+            // 2. Atalho Centralizado na Consulta (posicionado mais acima, logo abaixo do quadro de sorteios)
+            const consultContainer = document.getElementById('consultation-address-container');
+            const consultLink = document.getElementById('consultation-address-link');
+            const consultText = document.getElementById('consultation-address-text');
+
+            // 3. Fallback de compatibilidade
+            const footerContainer = document.getElementById('footer-address-container');
+            const footerText = document.getElementById('footer-address-text');
+
+            if (cleanAddress) {
+                // Link oficial de rotas/direções do Google Maps com a origem em "Sua Localização"
+                const queryAddress = currentUF ? `${cleanAddress}, ${currentUF}, Brasil` : cleanAddress;
+                const mapsRouteUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(queryAddress)}`;
+
+                if (headerLink && headerText) {
+                    headerText.innerText = cleanAddress;
+                    headerLink.href = mapsRouteUrl;
+                    headerLink.classList.remove('hidden');
+                }
+
+                if (consultContainer && consultLink && consultText) {
+                    consultText.innerText = cleanAddress;
+                    consultLink.href = mapsRouteUrl;
+                    consultContainer.classList.remove('hidden');
+                }
+
+                if (footerContainer && footerText) {
+                    footerText.innerText = cleanAddress;
+                    footerContainer.classList.remove('hidden');
+                }
             } else {
-                textEl.innerText = "";
-                container.classList.add('hidden');
+                if (headerLink) headerLink.classList.add('hidden');
+                if (consultContainer) consultContainer.classList.add('hidden');
+                if (footerContainer) footerContainer.classList.add('hidden');
             }
         }
 
