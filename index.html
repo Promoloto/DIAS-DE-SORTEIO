@@ -657,12 +657,13 @@
                             </p>
                         </div>
 
+                    </div>
                 </div>
 
             </div>
 
             <!-- SEÇÃO DE CLIENTES: LOTÉRICAS CADASTRADAS ORGANIZADAS POR ESTADO (UF) -->
-            <div id="clients-registry-box" class="mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+            <div id="clients-registry-box" class="w-full mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
                 <div class="border-b border-slate-200 pb-5 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-caixa-blue to-blue-700 text-white flex items-center justify-center text-2xl shadow-md shrink-0">
@@ -718,7 +719,7 @@
             </div>
 
             <!-- NOVA CAIXA NO PAINEL DO ADMINISTRADOR: ALTERAR DIAS DE SORTEIO DOS JOGOS -->
-            <div id="schedule-manager-box" class="mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+            <div id="schedule-manager-box" class="w-full mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
                 <div class="border-b border-slate-200 pb-5 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-caixa-blue to-blue-700 text-white flex items-center justify-center text-2xl shadow-md shrink-0">
@@ -771,7 +772,7 @@
             </div>
 
             <!-- NOVA CAIXA NO PAINEL DO ADMINISTRADOR: CRIADOR DE QR CODE EM SVG PERSONALIZADO -->
-            <div id="custom-qr-creator-box" class="mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
+            <div id="custom-qr-creator-box" class="w-full mt-10 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border-2 border-slate-200">
                 <div class="border-b border-slate-200 pb-5 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-caixa-blue to-blue-700 text-white flex items-center justify-center text-2xl shadow-md shrink-0">
@@ -2098,11 +2099,25 @@
 
         // --- 3. INICIALIZAÇÃO ---
         window.addEventListener('DOMContentLoaded', () => {
+            // Verificar parâmetro de lotérica na URL (?codigo=XXXX ou ?code=XXXX)
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlCode = urlParams.get('codigo') || urlParams.get('code');
+                if (urlCode) {
+                    const clean = urlCode.replace(/\D/g, '').slice(-4).padStart(4, '0');
+                    if (clean) {
+                        loadLotteryClient(clean, false);
+                    }
+                }
+            } catch (e) {}
+
             // Preencher inputs salvos
             const codeInputEl = document.getElementById('input-lottery-code');
             if (codeInputEl) codeInputEl.value = currentCode;
             const nameInputEl = document.getElementById('input-lottery-name');
             if (nameInputEl) nameInputEl.value = currentName;
+            const ufSelectEl = document.getElementById('select-lottery-uf');
+            if (ufSelectEl) ufSelectEl.value = currentUF || "SP";
             const waInputEl = document.getElementById('input-lottery-whatsapp');
             if (waInputEl) waInputEl.value = currentWhatsApp;
             const igInputEl = document.getElementById('input-lottery-instagram');
@@ -2113,12 +2128,14 @@
             if (addrInputEl) addrInputEl.value = currentAddress;
 
             // Renderizar componentes
+            renderHeader();
             updateAllLogos();
             renderHeaderContacts();
             renderFooterAddress();
             renderTableGrid();
             renderGamesFilterButtons();
             highlightCurrentDayOfWeek();
+            renderClientsList();
             applyAdminChanges(false, false); // Não salvar na nuvem ao carregar a página inicial
 
             // Escutar digitação ao vivo no código de 4 dígitos da lotérica
@@ -2920,6 +2937,10 @@
                             if (city || uf) {
                                 cityState = `${city} - ${uf}`.replace(/^-\s*|\s*-$/g, '');
                             }
+                            if (uf) {
+                                const ufSelect = document.getElementById('select-lottery-uf');
+                                if (ufSelect) ufSelect.value = uf.toUpperCase();
+                            }
                         }
                     }
                 }
@@ -2988,6 +3009,7 @@
         function applyAdminChanges(showToastNotification = true, persistToCloud = true) {
             const codeInput = document.getElementById('input-lottery-code');
             const nameInput = document.getElementById('input-lottery-name');
+            const ufSelect = document.getElementById('select-lottery-uf');
             const waInput = document.getElementById('input-lottery-whatsapp');
             const igInput = document.getElementById('input-lottery-instagram');
             const fbInput = document.getElementById('input-lottery-facebook');
@@ -2996,13 +3018,14 @@
             const rawVal = codeInput ? codeInput.value.trim() : "";
             currentCode = extractCode(rawVal);
             currentName = (nameInput && nameInput.value.trim()) || "Lotérica Pé Quente";
+            currentUF = (ufSelect && ufSelect.value) || currentUF || "SP";
             currentWhatsApp = waInput ? waInput.value.trim() : "";
             currentInstagram = igInput ? igInput.value.trim() : "";
             currentFacebook = fbInput ? fbInput.value.trim() : "";
             currentAddress = addrInput ? addrInput.value.trim() : "";
             currentQRColor = "#000000"; // CMYK 100, 100, 100, 100% (Preto Puro)
 
-            // URL fixa oficial da Caixa com os 4 dígitos finais
+            // URL fixa oficial da Caixa com os 4 dígitos finais para os botões de jogos
             currentLink = `https://www.loteriasonline.caixa.gov.br/silce-web/#/bolao-caixa/${currentCode}`;
 
             // Sincronizar campo com os 4 dígitos
@@ -3012,6 +3035,7 @@
 
             window.currentCode = currentCode;
             window.currentName = currentName;
+            window.currentUF = currentUF;
             window.customLogoData = customLogoData;
             window.currentWhatsApp = currentWhatsApp;
             window.currentInstagram = currentInstagram;
@@ -3023,6 +3047,7 @@
                 localStorage.setItem('caixa_bolao_link', currentLink);
                 localStorage.setItem('caixa_bolao_code', currentCode);
                 localStorage.setItem('caixa_bolao_name', currentName);
+                localStorage.setItem('caixa_lottery_uf', currentUF);
                 localStorage.setItem('caixa_contact_whatsapp', currentWhatsApp);
                 localStorage.setItem('caixa_contact_instagram', currentInstagram);
                 localStorage.setItem('caixa_contact_facebook', currentFacebook);
@@ -3030,9 +3055,21 @@
                 localStorage.setItem('caixa_bolao_qrcolor', "#000000");
             } catch (e) {}
 
+            // Persistir na base única de clientes (organizadas por UF sem perda de dados)
+            saveLotteryClient({
+                code: currentCode,
+                name: currentName,
+                uf: currentUF,
+                address: currentAddress,
+                whatsapp: currentWhatsApp,
+                instagram: currentInstagram,
+                facebook: currentFacebook,
+                logo: customLogoData,
+                scheduleData: SCHEDULE_DATA
+            }, persistToCloud);
+
             // Atualizar UI
-            const headerNameEl = document.getElementById('header-lottery-name');
-            if (headerNameEl) headerNameEl.innerText = currentName;
+            renderHeader();
             const previewNameEl = document.getElementById('preview-lottery-name');
             if (previewNameEl) previewNameEl.innerText = currentName;
             const previewCodeEl = document.getElementById('preview-lottery-code');
@@ -3044,7 +3081,7 @@
             renderHeaderContacts();
             renderFooterAddress();
 
-            // Gerar novo QR Code em SVG transparente
+            // Gerar novo QR Code em SVG transparente (apontando para diasdesorte.vercel.app/?codigo=XXXX)
             generateQrSvg();
 
             // Atualizar links da tabela e todos os logos
@@ -3056,6 +3093,7 @@
                 const payload = {
                     lotteryCode: currentCode,
                     lotteryName: currentName,
+                    lotteryUF: currentUF,
                     scheduleData: SCHEDULE_DATA,
                     contactWhatsApp: currentWhatsApp,
                     contactInstagram: currentInstagram,
@@ -3078,8 +3116,13 @@
         // --- 10. GERAÇÃO DE QR CODE EM SVG TOTALMENTE TRANSPARENTE (PARA CORELDRAW) ---
         function generateQrSvg() {
             try {
+                // O QR Code para a plaquinha no balcão aponta para o link único da lotérica
+                const qrTargetUrl = `https://diasdesorte.vercel.app/?codigo=${currentCode}`;
+                const targetTextEl = document.getElementById('qr-target-url-text');
+                if (targetTextEl) targetTextEl.innerText = qrTargetUrl;
+
                 const qr = qrcode(0, 'M');
-                qr.addData(currentLink);
+                qr.addData(qrTargetUrl);
                 qr.make();
 
                 const moduleCount = qr.getModuleCount();
